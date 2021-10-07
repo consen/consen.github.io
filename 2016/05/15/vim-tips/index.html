@@ -267,10 +267,10 @@
 <p>To open command-line window, From Normal mode, use the <code>&quot;q:&quot;</code>, <code>&quot;q/&quot;</code> or <code>&quot;q?&quot;</code> command.</p>
 <p><img src="/images/vim-tips/command-line-window.png" alt="command line window"></p>
 <h3 id="2-edit-binary-file"><a href="#2-edit-binary-file" class="headerlink" title="2. edit binary file"></a>2. edit binary file</h3><p>The following command replaces the buffer with a hex dump:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:%!xxd</span><br></pre></td></tr></table></figure>
 
 <p>You can edit the hex bytes, then convert the file back to binary with the command:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd -r</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:%!xxd -r</span><br></pre></td></tr></table></figure>
 
 <p>The above command reverses the hex dump by converting the hex bytes to binary (the printable text in the right column is ignored).</p>
 <p><img src="/images/vim-tips/edit-binary-1.png" alt="edit-binary-1"></p>
@@ -280,13 +280,13 @@
 <li>%&lt; current file name without extension</li>
 </ul>
 </blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%！hexdump -C</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:%！hexdump -C</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/vim-tips/edit-binary-2.jpg" alt="edit-binary-2"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd -p</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:%!xxd -p</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/vim-tips/edit-binary-3.png" alt="edit-binary-3"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd -p -r</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:%!xxd -p -r</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/vim-tips/edit-binary-4.png" alt="edit-binary-4"></p>
 <blockquote>
@@ -295,7 +295,7 @@
 <li>-r    -revert</li>
 </ul>
 </blockquote>
-<h3 id="3-indent"><a href="#3-indent" class="headerlink" title="3. indent"></a>3. indent</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gg=G</span><br></pre></td></tr></table></figure>
+<h3 id="3-indent"><a href="#3-indent" class="headerlink" title="3. indent"></a>3. indent</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gg=G</span><br></pre></td></tr></table></figure>
 
 <p>In normal mode, typing <code>gg=G</code> will reindent the entire file. This is a special case, <code>=</code> is an operator. Just like <code>d</code> or <code>y</code>, it will act on any text that you move over with a cursor motion command. In this case, <code>gg</code> positions the cursor on the first line, then <code>=G</code> re-indents from the current cursor position to the end of the buffer.</p>
 <blockquote>
@@ -337,7 +337,7 @@
 <p><code>:dig[raphs]</code> show currently defined digraphs.</p>
 <p><img src="/images/vim-tips/digraphs.png" alt="digraphs"></p>
 <p>In insert mode, <code>CTRL-K &#123;char1&#125; &#123;char2&#125;</code> to enter digraphs.</p>
-<h3 id="8-diff-mode"><a href="#8-diff-mode" class="headerlink" title="8. diff mode"></a>8. diff mode</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vimdiff file1 file2 [file3 [file4]]</span><br><span class="line">$ vim -d file1 file2 [file3 [file4]]</span><br></pre></td></tr></table></figure>
+<h3 id="8-diff-mode"><a href="#8-diff-mode" class="headerlink" title="8. diff mode"></a>8. diff mode</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ vimdiff file1 file2 [file3 [file4]]</span><br><span class="line">$ vim -d file1 file2 [file3 [file4]]</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/vim-tips/diff-mode.jpg" alt="diff-mode"></p>
 <blockquote>
@@ -356,7 +356,7 @@
 </ul>
 </blockquote>
 <h3 id="9-edit-compressed-files"><a href="#9-edit-compressed-files" class="headerlink" title="9. edit compressed files"></a>9. edit compressed files</h3><p>To see more info:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">:h gzip    (*.gz, *.bz2, *.Z)</span><br><span class="line">:h zip     (*.zip)</span><br><span class="line">:h tar     (*.tar)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:h gzip    (*.gz, *.bz2, *.Z)</span><br><span class="line">:h zip     (*.zip)</span><br><span class="line">:h tar     (*.tar)</span><br></pre></td></tr></table></figure>
 
 <h3 id="10-substitute"><a href="#10-substitute" class="headerlink" title="10. substitute"></a>10. substitute</h3><p><code>:%s/foo/bar/g</code><br>    Find each occurrence of ‘foo’ (in all lines), and replace it with ‘bar’.</p>
 <p><code>:s/foo/bar/g</code><br>    Find each occurrence of ‘foo’ (in the current line only), and replace it with ‘bar’.</p>
@@ -365,10 +365,10 @@
 <p><code>:%s/\s\+$//</code><br>    Delete all trailing whitespace (at the end of each line).<br>    In a search, \s finds whitespace (a space or a tab), and + finds one or more occurrences.</p>
 <h3 id="11-recording-a-macro"><a href="#11-recording-a-macro" class="headerlink" title="11. recording a macro"></a>11. recording a macro</h3><p>Each register is identified by a letter <code>a</code> to <code>z</code>.</p>
 <p>To enter a macro, type:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">q&lt;letter&gt;&lt;commands&gt;q</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">q&lt;letter&gt;&lt;commands&gt;q</span><br></pre></td></tr></table></figure>
 
 <p>To execute the macro <number> times (once by default), type:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;number&gt;@&lt;letter&gt;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;number&gt;@&lt;letter&gt;</span><br></pre></td></tr></table></figure>
 
 <p>So, the complete process looks like:</p>
 <blockquote>
@@ -380,21 +380,21 @@
 <li>@@  execute your macro again</li>
 </ol>
 </blockquote>
-<h3 id="12-count"><a href="#12-count" class="headerlink" title="12. count"></a>12. count</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g CTRL-G            (:h g_CTRL-G word-count byte-count)</span><br></pre></td></tr></table></figure>
+<h3 id="12-count"><a href="#12-count" class="headerlink" title="12. count"></a>12. count</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">g CTRL-G            (:h g_CTRL-G word-count byte-count)</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/vim-tips/count-1.png" alt="count-1"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;Visual&#125;g CTRL-G    (:h v_g_CTRL-G)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&#123;Visual&#125;g CTRL-G    (:h v_g_CTRL-G)</span><br></pre></td></tr></table></figure>
 
 <p><img src="/images/vim-tips/count-2.png" alt="count-2"></p>
-<h3 id="13-changing-tabs"><a href="#13-changing-tabs" class="headerlink" title="13. changing tabs"></a>13. changing tabs</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">:retab</span><br><span class="line"></span><br><span class="line">:[range]ret[ab][!] [new_tabstop]</span><br></pre></td></tr></table></figure>
+<h3 id="13-changing-tabs"><a href="#13-changing-tabs" class="headerlink" title="13. changing tabs"></a>13. changing tabs</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:retab</span><br><span class="line"></span><br><span class="line">:[range]ret[ab][!] [new_tabstop]</span><br></pre></td></tr></table></figure>
 
 <p>Replace all sequences of white-space containing a <Tab> with new strings of white-space using the new tabstop value given.  If you do not specify a new tabstop size or it is zero, Vim uses the current value of ‘tabstop’.</p>
 <h3 id="14-su-write"><a href="#14-su-write" class="headerlink" title="14. su-write"></a>14. su-write</h3><p>If you find you do not have permission to perform :w, use the following:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:w !sudo tee % &gt; /dev/null</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:w !sudo tee % &gt; /dev/null</span><br></pre></td></tr></table></figure>
 
-<h3 id="15-open-file-with-specified-line-number"><a href="#15-open-file-with-specified-line-number" class="headerlink" title="15. open file with specified line number"></a>15. open file with specified line number</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vim filename +10</span><br></pre></td></tr></table></figure>
+<h3 id="15-open-file-with-specified-line-number"><a href="#15-open-file-with-specified-line-number" class="headerlink" title="15. open file with specified line number"></a>15. open file with specified line number</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ vim filename +10</span><br></pre></td></tr></table></figure>
 
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+                    Start at end of file</span><br><span class="line">+&lt;lnum&gt;              Start at line &lt;lnum&gt;</span><br><span class="line">--cmd &lt;command&gt;      Execute &lt;command&gt; before loading any vimrc file</span><br><span class="line">-c &lt;command&gt;         Execute &lt;command&gt; after loading the first file</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">+                    Start at end of file</span><br><span class="line">+&lt;lnum&gt;              Start at line &lt;lnum&gt;</span><br><span class="line">--cmd &lt;command&gt;      Execute &lt;command&gt; before loading any vimrc file</span><br><span class="line">-c &lt;command&gt;         Execute &lt;command&gt; after loading the first file</span><br></pre></td></tr></table></figure>
 
 <h3 id="16-jump"><a href="#16-jump" class="headerlink" title="16. jump"></a>16. jump</h3><p>In normal mode, <code>%</code> jumps to corresponding item, e.g. from an open brace to its matching closing brace.</p>
 <p>Like a web browser, you can go back, then forward:</p>
@@ -403,9 +403,9 @@
 <li>Press Ctrl-I (same as Tab) to jump forward to the next (newer) location.</li>
 </ul>
 <p>Display the jump list for the current window with:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:jumps</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:jumps</span><br></pre></td></tr></table></figure>
 
-<h3 id="17-format-json"><a href="#17-format-json" class="headerlink" title="17. format json"></a>17. format json</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!python -m json.tool</span><br></pre></td></tr></table></figure>
+<h3 id="17-format-json"><a href="#17-format-json" class="headerlink" title="17. format json"></a>17. format json</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">:%!python -m json.tool</span><br></pre></td></tr></table></figure>
 
 <h3 id="18-vim-plugin-manager"><a href="#18-vim-plugin-manager" class="headerlink" title="18. vim plugin manager"></a>18. vim plugin manager</h3><ul>
 <li><a target="_blank" rel="noopener" href="http://vi.stackexchange.com/questions/388/what-is-the-difference-between-the-vim-package-managers">What is the difference between the vim package managers?</a></li>

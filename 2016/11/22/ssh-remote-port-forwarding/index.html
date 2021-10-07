@@ -247,7 +247,7 @@
 <p>但是，因业务原因，一部分服务器部署在隔离网，导致服务器无法访问XenforceHub，无法使用<code>xenforce pull</code>命令部署镜像，一夜回到解放前，即使有<code>scp</code>、<code>rsync</code>、<code>nc</code>等一些优秀工具，可以借助用来手动同步镜像，还是太麻烦，程序猿懒起来，自己都害怕。最理想的方式还是用<code>xenforce pull</code>部署镜像，即使服务器在隔离网内。程序猿的首要任务是把不可能变得可能，把复杂变得简单，把低效变得高效。</p>
 <p>隐隐约约想起当初学SSH的时候，SSH有个很精妙的用法，比如A、B两台服务器之间要实现互通，但是现在A可以访问B，B却不能访问A，那么B怎样访问A呢？可以借助SSH的远程端口转发功能。今天仔细研究了下，果然派上了用场。</p>
 <p>以服务器server1为例，XenforceHub服务器可以访问server1，但是server1无法访问XenforceHub，在XenforceHub服务器上运行以下命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -R 9000:localhost:9000 xikangjie@server1</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">ssh -R 9000:localhost:9000 xikangjie@server1</span><br></pre></td></tr></table></figure>
 
 <p>这样，在服务器server1上访问localhost:9000，就相当于访问XenforceHub:9000，又可以愉快地用命令<code>xenforce pull</code>部署镜像了。</p>
 <p><img src="/images/ssh-remote-port-forwarding/pull2.gif"></p>

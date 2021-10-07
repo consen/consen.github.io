@@ -279,21 +279,21 @@
 <ul>
 <li>会话（session）</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ tmux new -s session-name          ; 新建会话</span><br><span class="line">$ tmux detach                       ; 断开会话</span><br><span class="line">$ tmux ls                           ; 列出会话</span><br><span class="line">$ tmux attach -t session-name       ; 连接会话，远程连接突然中断，再次连接后，attach到原先的会话，继续之前的操作</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ tmux new -s session-name          ; 新建会话</span><br><span class="line">$ tmux detach                       ; 断开会话</span><br><span class="line">$ tmux ls                           ; 列出会话</span><br><span class="line">$ tmux attach -t session-name       ; 连接会话，远程连接突然中断，再次连接后，attach到原先的会话，继续之前的操作</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>窗口（window）</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Ctrl+a c            ; 新建窗口</span><br><span class="line">Ctrl+a [0-9]        ; 切换窗口</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Ctrl+a c            ; 新建窗口</span><br><span class="line">Ctrl+a [0-9]        ; 切换窗口</span><br></pre></td></tr></table></figure>
 
 <ul>
 <li>窗格（pane）</li>
 </ul>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Ctrl+a -    ; 建立垂直窗格</span><br><span class="line">Ctrl+a |    ; 建立水平窗格</span><br><span class="line">Ctrl+a hjkl ; 切换窗格</span><br><span class="line">Ctrl+a z    ; 最大化窗格</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Ctrl+a -    ; 建立垂直窗格</span><br><span class="line">Ctrl+a |    ; 建立水平窗格</span><br><span class="line">Ctrl+a hjkl ; 切换窗格</span><br><span class="line">Ctrl+a z    ; 最大化窗格</span><br></pre></td></tr></table></figure>
 
 <h2 id="Git"><a href="#Git" class="headerlink" title="Git"></a>Git</h2><p>现在对代码的管理，已是<a target="_blank" rel="noopener" href="https://git-scm.com/">Git</a>一统天下，又有<a target="_blank" rel="noopener" href="https://github.com/">GitHub</a>加持，实在是解放了程序员，大大提升开发效率。</p>
 <p>Git的命令很多，但日常用的20%都不到：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ git clone</span><br><span class="line">$ git pull</span><br><span class="line">$ git status</span><br><span class="line">$ git diff</span><br><span class="line">$ git add</span><br><span class="line">$ git commit -m &#x27;&#x27;</span><br><span class="line">$ git push</span><br><span class="line">$ git log</span><br><span class="line"></span><br><span class="line">$ git branch</span><br><span class="line">$ git checkout</span><br><span class="line">$ git merge</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git clone</span><br><span class="line">$ git pull</span><br><span class="line">$ git status</span><br><span class="line">$ git diff</span><br><span class="line">$ git add</span><br><span class="line">$ git commit -m &#x27;&#x27;</span><br><span class="line">$ git push</span><br><span class="line">$ git log</span><br><span class="line"></span><br><span class="line">$ git branch</span><br><span class="line">$ git checkout</span><br><span class="line">$ git merge</span><br></pre></td></tr></table></figure>
 
 <h2 id="Zsh"><a href="#Zsh" class="headerlink" title="Zsh"></a>Zsh</h2><p>不推荐直接上手Zsh, 先从Bash玩起，因为你可以在开发环境下自己装个Zsh, 但是产品环境并不一定有Zsh，却一定有Bash。先从Bash开始搞懂Linux Shell的核心思想，比如至少对以下几点比较熟练：</p>
 <ul>

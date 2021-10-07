@@ -244,71 +244,71 @@
 <p>将文件解压缩后，会看到文件用了<a target="_blank" rel="noopener" href="https://www.gnupg.org/">GnuPG</a>工具进行加密，简单了解了下GnuPG怎么用，现在分享出来。</p>
 <span id="more"></span>
 
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ unzip EQGRP-Auction-Files.zip -d EQGRP-Auction-Files</span><br><span class="line">$ ls EQGRP-Auction-Files</span><br><span class="line">eqgrp-auction-file.tar.xz.gpg</span><br><span class="line">eqgrp-auction-file.tar.xz.gpg.sig</span><br><span class="line">eqgrp-free-file.tar.xz.gpg</span><br><span class="line">eqgrp-free-file.tar.xz.gpg.sig</span><br><span class="line">public.key.asc</span><br><span class="line">sha256sum.txt</span><br><span class="line">sha256sum.txt.sig</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ unzip EQGRP-Auction-Files.zip -d EQGRP-Auction-Files</span><br><span class="line">$ ls EQGRP-Auction-Files</span><br><span class="line">eqgrp-auction-file.tar.xz.gpg</span><br><span class="line">eqgrp-auction-file.tar.xz.gpg.sig</span><br><span class="line">eqgrp-free-file.tar.xz.gpg</span><br><span class="line">eqgrp-free-file.tar.xz.gpg.sig</span><br><span class="line">public.key.asc</span><br><span class="line">sha256sum.txt</span><br><span class="line">sha256sum.txt.sig</span><br></pre></td></tr></table></figure>
 
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>CentOS安装GnuPG：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># yum install gnupg2</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># yum install gnupg2</span><br></pre></td></tr></table></figure>
 
 <h2 id="对称加密-解密"><a href="#对称加密-解密" class="headerlink" title="对称加密/解密"></a>对称加密/解密</h2><p>加密解密使用相同的密钥。</p>
-<h3 id="加密："><a href="#加密：" class="headerlink" title="加密："></a>加密：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg -c --cipher-algo AES256 demo.txt</span><br></pre></td></tr></table></figure>
+<h3 id="加密："><a href="#加密：" class="headerlink" title="加密："></a>加密：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg -c --cipher-algo AES256 demo.txt</span><br></pre></td></tr></table></figure>
 <p>按提示输入密码，生成<code>demo.txt.gpg</code>加密文件。</p>
-<h3 id="解密："><a href="#解密：" class="headerlink" title="解密："></a>解密：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg demo.txt.gpg</span><br></pre></td></tr></table></figure>
+<h3 id="解密："><a href="#解密：" class="headerlink" title="解密："></a>解密：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg demo.txt.gpg</span><br></pre></td></tr></table></figure>
 
 <p>按提示输入密码，生成<code>demo.txt</code>解密文件。</p>
 <h3 id="解密Equation-Group"><a href="#解密Equation-Group" class="headerlink" title="解密Equation Group:"></a>解密Equation Group:</h3><p><code>The Shadow Brokers</code>释放了文件<code>eqgrp-free-file.tar.xz.gpg</code>的密码<code>theequationgroup</code>，可以直接解密；文件<code>eqgrp-auction-file.tar.xz.gpg</code>出价5亿美刀拍卖，只能坐等后面好戏了:)。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg eqgrp-free-file.tar.xz.gpg</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg eqgrp-free-file.tar.xz.gpg</span><br></pre></td></tr></table></figure>
 
 <p>按提示输入密码：</p>
 <p><img src="/images/gpg-introduction/decrypt.png" alt="decrypt"></p>
 <p>得到文件<code>eqgrp-free-file.tar.xz</code>，直接解压缩：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ tar -xvf eqgrp-free-file.tar.xz</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ tar -xvf eqgrp-free-file.tar.xz</span><br></pre></td></tr></table></figure>
 
 <p>得到Fireware文件夹，所有秘密尽收眼底：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ tree Firewall/ -L 1 -F</span><br><span class="line">Firewall/</span><br><span class="line">├── BANANAGLEE/</span><br><span class="line">├── BARGLEE/</span><br><span class="line">├── BLATSTING/</span><br><span class="line">├── BUZZDIRECTION/</span><br><span class="line">├── EXPLOITS/</span><br><span class="line">├── OPS/</span><br><span class="line">├── padding</span><br><span class="line">├── SCRIPTS/</span><br><span class="line">├── TOOLS/</span><br><span class="line">└── TURBO/</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ tree Firewall/ -L 1 -F</span><br><span class="line">Firewall/</span><br><span class="line">├── BANANAGLEE/</span><br><span class="line">├── BARGLEE/</span><br><span class="line">├── BLATSTING/</span><br><span class="line">├── BUZZDIRECTION/</span><br><span class="line">├── EXPLOITS/</span><br><span class="line">├── OPS/</span><br><span class="line">├── padding</span><br><span class="line">├── SCRIPTS/</span><br><span class="line">├── TOOLS/</span><br><span class="line">└── TURBO/</span><br></pre></td></tr></table></figure>
 
 <h2 id="非对称加密-解密"><a href="#非对称加密-解密" class="headerlink" title="非对称加密/解密"></a>非对称加密/解密</h2><p>公钥加密，私钥解密。</p>
-<h3 id="生成密钥对："><a href="#生成密钥对：" class="headerlink" title="生成密钥对："></a>生成密钥对：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --gen-key</span><br></pre></td></tr></table></figure>
+<h3 id="生成密钥对："><a href="#生成密钥对：" class="headerlink" title="生成密钥对："></a>生成密钥对：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --gen-key</span><br></pre></td></tr></table></figure>
 
 <p>列出公钥:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --list-keys</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --list-keys</span><br></pre></td></tr></table></figure>
 
 <p>列出私钥:</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --list-secret-keys</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --list-secret-keys</span><br></pre></td></tr></table></figure>
 
 <p>导出公钥：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gpg -a -o public-key.txt --export key-identifier</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gpg -a -o public-key.txt --export key-identifier</span><br></pre></td></tr></table></figure>
 
 <p>这个公钥文件<code>pulibc-key.txt</code>就可以拿给别人用了。</p>
 <h3 id="加密：-1"><a href="#加密：-1" class="headerlink" title="加密："></a>加密：</h3><p>如果需要使用的公钥不存在，需要提前导入。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gpg --encrypt --recipient key-identifier demo.txt</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">gpg -e -r key-identifier demo.txt</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gpg --encrypt --recipient key-identifier demo.txt</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">gpg -e -r key-identifier demo.txt</span><br></pre></td></tr></table></figure>
 
 <p>生成加密文件demo.txt.gpg。</p>
-<h3 id="解密：-1"><a href="#解密：-1" class="headerlink" title="解密："></a>解密：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">gpg --output demo.txt --decrypt demo.txt.gpg</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">gpg demo.txt.gpg</span><br></pre></td></tr></table></figure>
+<h3 id="解密：-1"><a href="#解密：-1" class="headerlink" title="解密："></a>解密：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gpg --output demo.txt --decrypt demo.txt.gpg</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">gpg demo.txt.gpg</span><br></pre></td></tr></table></figure>
 
 <p>生成解密文件demo.txt。</p>
 <h2 id="签名-验签"><a href="#签名-验签" class="headerlink" title="签名/验签"></a>签名/验签</h2><blockquote>
 <p>非对称加密的另一个用途是用于数字签名，签署者使用他的私钥（应用一个签名算法）来签署文档。验证者使用签署者的公钥（公开的）验证文档。当一个文档被签署时，任何人都能验证它，因为任何人都能访问签署者的公钥。由于私钥的保密性，签名是无法伪造的。</p>
 </blockquote>
-<h3 id="签名："><a href="#签名：" class="headerlink" title="签名："></a>签名：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --armor -output demo.txt.sig --detach-sign demo.txt</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">$ gpg -a -o demo.txt.sig -b demo.txt</span><br></pre></td></tr></table></figure>
+<h3 id="签名："><a href="#签名：" class="headerlink" title="签名："></a>签名：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --armor -output demo.txt.sig --detach-sign demo.txt</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">$ gpg -a -o demo.txt.sig -b demo.txt</span><br></pre></td></tr></table></figure>
 
 <p>按提示输入私钥密码，输出<code>demo.txt.sig</code>签名文件。</p>
-<h3 id="验签："><a href="#验签：" class="headerlink" title="验签："></a>验签：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --verify demo.txt.sig demo.txt</span><br><span class="line">gpg: Signature made Thu 18 Aug 2016 05:08:22 PM CST using RSA key ID 26940C51</span><br><span class="line">gpg: Good signature from &quot;xikangjie (test) &lt;xikangjie@consen.cn&gt;&quot;</span><br></pre></td></tr></table></figure>
+<h3 id="验签："><a href="#验签：" class="headerlink" title="验签："></a>验签：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --verify demo.txt.sig demo.txt</span><br><span class="line">gpg: Signature made Thu 18 Aug 2016 05:08:22 PM CST using RSA key ID 26940C51</span><br><span class="line">gpg: Good signature from &quot;xikangjie (test) &lt;xikangjie@consen.cn&gt;&quot;</span><br></pre></td></tr></table></figure>
 
 <p>如果demo.txt文件存在，可以省略.</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --verify demo.txt.sig</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --verify demo.txt.sig</span><br></pre></td></tr></table></figure>
 
-<h3 id="Equation-Group验签："><a href="#Equation-Group验签：" class="headerlink" title="Equation Group验签："></a>Equation Group验签：</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --verify sha256sum.txt.sig</span><br><span class="line">gpg: Signature made Mon 01 Aug 2016 11:23:02 AM CST using RSA key ID CB5C0C1B</span><br><span class="line">gpg: Can&#x27;t check signature: No public key</span><br></pre></td></tr></table></figure>
+<h3 id="Equation-Group验签："><a href="#Equation-Group验签：" class="headerlink" title="Equation Group验签："></a>Equation Group验签：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --verify sha256sum.txt.sig</span><br><span class="line">gpg: Signature made Mon 01 Aug 2016 11:23:02 AM CST using RSA key ID CB5C0C1B</span><br><span class="line">gpg: Can&#x27;t check signature: No public key</span><br></pre></td></tr></table></figure>
 
 <p>提示没有公钥，这就是文件<code>public.key.asc</code>的作用，将其导入：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --import public.key.asc</span><br><span class="line">gpg: key CB5C0C1B: public key &quot;The Shadow Broker &lt;theshadowbroker@mail.i2p&gt;&quot; imported</span><br><span class="line">gpg: Total number processed: 1</span><br><span class="line">gpg:               imported: 1  (RSA: 1)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --import public.key.asc</span><br><span class="line">gpg: key CB5C0C1B: public key &quot;The Shadow Broker &lt;theshadowbroker@mail.i2p&gt;&quot; imported</span><br><span class="line">gpg: Total number processed: 1</span><br><span class="line">gpg:               imported: 1  (RSA: 1)</span><br></pre></td></tr></table></figure>
 
 <p>再次验签：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --verify sha256sum.txt.sig</span><br><span class="line">gpg: Signature made Mon 01 Aug 2016 11:23:02 AM CST using RSA key ID CB5C0C1B</span><br><span class="line">gpg: Good signature from &quot;The Shadow Broker &lt;theshadowbroker@mail.i2p&gt;&quot;</span><br><span class="line">gpg: WARNING: This key is not certified with a trusted signature!</span><br><span class="line">gpg:          There is no indication that the signature belongs to the owner.</span><br><span class="line">Primary key fingerprint: 8369 E676 9C13 F624 3103  15E6 0412 4F2C CB5C 0C1B</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --verify sha256sum.txt.sig</span><br><span class="line">gpg: Signature made Mon 01 Aug 2016 11:23:02 AM CST using RSA key ID CB5C0C1B</span><br><span class="line">gpg: Good signature from &quot;The Shadow Broker &lt;theshadowbroker@mail.i2p&gt;&quot;</span><br><span class="line">gpg: WARNING: This key is not certified with a trusted signature!</span><br><span class="line">gpg:          There is no indication that the signature belongs to the owner.</span><br><span class="line">Primary key fingerprint: 8369 E676 9C13 F624 3103  15E6 0412 4F2C CB5C 0C1B</span><br></pre></td></tr></table></figure>
 <p>警告公钥不受信任，将其签入设为信任：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --sign-key &#x27;The Shadow Broker&#x27;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --sign-key &#x27;The Shadow Broker&#x27;</span><br></pre></td></tr></table></figure>
 
 <p>再次验签：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ gpg --verify sha256sum.txt.sig</span><br><span class="line">gpg: Signature made Mon 01 Aug 2016 11:23:02 AM CST using RSA key ID CB5C0C1B</span><br><span class="line">gpg: Good signature from &quot;The Shadow Broker &lt;theshadowbroker@mail.i2p&gt;&quot;</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --verify sha256sum.txt.sig</span><br><span class="line">gpg: Signature made Mon 01 Aug 2016 11:23:02 AM CST using RSA key ID CB5C0C1B</span><br><span class="line">gpg: Good signature from &quot;The Shadow Broker &lt;theshadowbroker@mail.i2p&gt;&quot;</span><br></pre></td></tr></table></figure>
 
 <p><strong>参考文档：</strong></p>
 <ul>
