@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="Vim作为Linux下必备开发工具，熟练掌握，可以大大提升开发及编辑效率。   基本上所有Linux发行版都预装了Vim，开箱即用，唾手可得，无需再下载安装。   Vim强大的同时也带来了复杂性，学习成本较高，需要慢慢积累，先掌握基础操作，然后再遇到问题解决问题。Vim使用近三年，自己掌握了一些Vim有意思的特性，现在分享出来，希望对你也有帮助。  Think Vim before you us">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vim Tips">
+<meta property="og:url" content="https://consen.github.io/2016/05/15/vim-tips/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="Vim作为Linux下必备开发工具，熟练掌握，可以大大提升开发及编辑效率。   基本上所有Linux发行版都预装了Vim，开箱即用，唾手可得，无需再下载安装。   Vim强大的同时也带来了复杂性，学习成本较高，需要慢慢积累，先掌握基础操作，然后再遇到问题解决问题。Vim使用近三年，自己掌握了一些Vim有意思的特性，现在分享出来，希望对你也有帮助。  Think Vim before you us">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/tabs-windows-buffers.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/command-line-window.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/edit-binary-1.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/edit-binary-2.jpg">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/edit-binary-3.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/edit-binary-4.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/digraphs.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/diff-mode.jpg">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/count-1.png">
+<meta property="og:image" content="https://consen.github.io/images/vim-tips/count-2.png">
+<meta property="article:published_time" content="2016-05-15T04:05:52.000Z">
+<meta property="article:modified_time" content="2021-10-06T09:50:11.822Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="Vim">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://consen.github.io/images/vim-tips/tabs-windows-buffers.png">
+
+
+<link rel="canonical" href="https://consen.github.io/2016/05/15/vim-tips/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2016/05/15/vim-tips/","path":"2016/05/15/vim-tips/","title":"Vim Tips"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Vim Tips | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0-tab-window-buffer"><span class="nav-text">0. tab, window, buffer</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-command-line-window"><span class="nav-text">1. command-line window</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-edit-binary-file"><span class="nav-text">2. edit binary file</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-indent"><span class="nav-text">3. indent</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-multiline-editing"><span class="nav-text">4. multiline editing</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-window-resize"><span class="nav-text">5. window resize</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-list-mode"><span class="nav-text">6. list mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-digraphs"><span class="nav-text">7. digraphs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-diff-mode"><span class="nav-text">8. diff mode</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-edit-compressed-files"><span class="nav-text">9. edit compressed files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-substitute"><span class="nav-text">10. substitute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-recording-a-macro"><span class="nav-text">11. recording a macro</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-count"><span class="nav-text">12. count</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-changing-tabs"><span class="nav-text">13. changing tabs</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-su-write"><span class="nav-text">14. su-write</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-open-file-with-specified-line-number"><span class="nav-text">15. open file with specified line number</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-jump"><span class="nav-text">16. jump</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-format-json"><span class="nav-text">17. format json</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-vim-plugin-manager"><span class="nav-text">18. vim plugin manager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#19-useful-resources"><span class="nav-text">19. useful resources</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2016/05/15/vim-tips/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Vim Tips
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2016-05-15 12:05:52" itemprop="dateCreated datePublished" datetime="2016-05-15T12:05:52+08:00">2016-05-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Toolbox/" itemprop="url" rel="index"><span itemprop="name">Toolbox</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>Vim作为Linux下必备开发工具，熟练掌握，可以大大提升开发及编辑效率。</p>
+</blockquote>
+<blockquote>
+<p>基本上所有Linux发行版都预装了Vim，开箱即用，唾手可得，无需再下载安装。</p>
+</blockquote>
+<blockquote>
+<p>Vim强大的同时也带来了复杂性，学习成本较高，需要慢慢积累，先掌握基础操作，然后再遇到问题解决问题。Vim使用近三年，自己掌握了一些Vim有意思的特性，现在分享出来，希望对你也有帮助。</p>
+</blockquote>
+<p><strong>Think Vim before you use Emacs.</strong></p>
+<span id="more"></span>
+
+<h3 id="0-tab-window-buffer"><a href="#0-tab-window-buffer" class="headerlink" title="0. tab, window, buffer"></a>0. tab, window, buffer</h3><p><img src="/images/vim-tips/tabs-windows-buffers.png" alt="tab-window-buffer"></p>
+<p>An illustration of the relationships among Vim’s tabs, windows, and buffers. Buffers 4 and 6 are considered hidden, since they are not visible in any window.</p>
+<h3 id="1-command-line-window"><a href="#1-command-line-window" class="headerlink" title="1. command-line window"></a>1. command-line window</h3><p>In the command-line window the command line can be edited just like editing in any window.</p>
+<p>To open command-line window, From Normal mode, use the <code>&quot;q:&quot;</code>, <code>&quot;q/&quot;</code> or <code>&quot;q?&quot;</code> command.</p>
+<p><img src="/images/vim-tips/command-line-window.png" alt="command line window"></p>
+<h3 id="2-edit-binary-file"><a href="#2-edit-binary-file" class="headerlink" title="2. edit binary file"></a>2. edit binary file</h3><p>The following command replaces the buffer with a hex dump:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd</span><br></pre></td></tr></table></figure>
+
+<p>You can edit the hex bytes, then convert the file back to binary with the command:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd -r</span><br></pre></td></tr></table></figure>
+
+<p>The above command reverses the hex dump by converting the hex bytes to binary (the printable text in the right column is ignored).</p>
+<p><img src="/images/vim-tips/edit-binary-1.png" alt="edit-binary-1"></p>
+<blockquote>
+<ul>
+<li>%  current file name</li>
+<li>%&lt; current file name without extension</li>
+</ul>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%！hexdump -C</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/vim-tips/edit-binary-2.jpg" alt="edit-binary-2"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd -p</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/vim-tips/edit-binary-3.png" alt="edit-binary-3"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!xxd -p -r</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/vim-tips/edit-binary-4.png" alt="edit-binary-4"></p>
+<blockquote>
+<ul>
+<li>-p    -plain</li>
+<li>-r    -revert</li>
+</ul>
+</blockquote>
+<h3 id="3-indent"><a href="#3-indent" class="headerlink" title="3. indent"></a>3. indent</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gg=G</span><br></pre></td></tr></table></figure>
+
+<p>In normal mode, typing <code>gg=G</code> will reindent the entire file. This is a special case, <code>=</code> is an operator. Just like <code>d</code> or <code>y</code>, it will act on any text that you move over with a cursor motion command. In this case, <code>gg</code> positions the cursor on the first line, then <code>=G</code> re-indents from the current cursor position to the end of the buffer.</p>
+<blockquote>
+<ul>
+<li>&gt;&gt; Indent line by shiftwidth spaces</li>
+<li>&lt;&lt; De-indent line by shiftwidth spaces</li>
+<li>5&gt;&gt; Indent 5 lines</li>
+<li>5== Re-indent 5 lines</li>
+</ul>
+</blockquote>
+<h3 id="4-multiline-editing"><a href="#4-multiline-editing" class="headerlink" title="4. multiline editing"></a>4. multiline editing</h3><p>In visual block mode, you can press <code>I</code> to insert text at the same position in multiple lines, and you can press <code>A</code> to append text to each line in a block.</p>
+<p>Insert</p>
+<blockquote>
+<ol>
+<li>Use Ctrl+V(or Ctrl-Q if you use Ctrl-V for paste) to select the column of text in the lines you want to insert.</li>
+<li>Then hit I and type the text you want to insert.</li>
+<li>Then hit Esc, wait 1 second and the inserted text will appear on every line.</li>
+</ol>
+</blockquote>
+<p>Append</p>
+<blockquote>
+<ol>
+<li>Use Ctrl+V(or Ctrl-Q if you use Ctrl-V for paste) to select the column of text in the lines you want to append.</li>
+<li>Press $ to extend the visual block to the end of each line.</li>
+<li>Then hit A and type the text you want to append.</li>
+<li>Then hit Esc, wait 1 second and the inserted text will appear on every line.</li>
+</ol>
+</blockquote>
+<h3 id="5-window-resize"><a href="#5-window-resize" class="headerlink" title="5. window resize"></a>5. window resize</h3><blockquote>
+<ul>
+<li>equal size        ^W=</li>
+<li>max height        ^W_</li>
+<li>max width         ^W|</li>
+</ul>
+</blockquote>
+<h3 id="6-list-mode"><a href="#6-list-mode" class="headerlink" title="6. list mode"></a>6. list mode</h3><p><code>:set list</code> displays whitespace, <code>:set nolist</code> displays normally.</p>
+<p><code>set listchars</code>: Strings to use in <code>list</code> mode.</p>
+<h3 id="7-digraphs"><a href="#7-digraphs" class="headerlink" title="7. digraphs"></a>7. digraphs</h3><p>Digraphs are used to enter characters that normally cannot be entered by an ordinary keyboard.</p>
+<p><code>:dig[raphs]</code> show currently defined digraphs.</p>
+<p><img src="/images/vim-tips/digraphs.png" alt="digraphs"></p>
+<p>In insert mode, <code>CTRL-K &#123;char1&#125; &#123;char2&#125;</code> to enter digraphs.</p>
+<h3 id="8-diff-mode"><a href="#8-diff-mode" class="headerlink" title="8. diff mode"></a>8. diff mode</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ vimdiff file1 file2 [file3 [file4]]</span><br><span class="line">$ vim -d file1 file2 [file3 [file4]]</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/vim-tips/diff-mode.jpg" alt="diff-mode"></p>
+<blockquote>
+<ul>
+<li>do - Get changes from other window into the current window.</li>
+<li>dp - Put the changes from current window into the other window.</li>
+<li>]c - Jump to the next change.</li>
+<li>[c - Jump to the previous change.</li>
+<li>zo - open fold.</li>
+<li>zc - close fold.</li>
+<li>:diffu[pdate] - Update the diff highlighting and folds.</li>
+<li>:qa - quit all</li>
+<li>:wa - write all</li>
+<li>:wqa - write, then quit all</li>
+<li>:qa! - force to quit all</li>
+</ul>
+</blockquote>
+<h3 id="9-edit-compressed-files"><a href="#9-edit-compressed-files" class="headerlink" title="9. edit compressed files"></a>9. edit compressed files</h3><p>To see more info:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">:h gzip    (*.gz, *.bz2, *.Z)</span><br><span class="line">:h zip     (*.zip)</span><br><span class="line">:h tar     (*.tar)</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-substitute"><a href="#10-substitute" class="headerlink" title="10. substitute"></a>10. substitute</h3><p><code>:%s/foo/bar/g</code><br>    Find each occurrence of ‘foo’ (in all lines), and replace it with ‘bar’.</p>
+<p><code>:s/foo/bar/g</code><br>    Find each occurrence of ‘foo’ (in the current line only), and replace it with ‘bar’.</p>
+<p><code>:%s/foo/bar/gc</code><br>    Change each ‘foo’ to ‘bar’, but ask for confirmation first.</p>
+<p><code>:5,12s/foo/bar/g</code><br>    Change each ‘foo’ to ‘bar’ for all lines from line 5 to line 12 (inclusive).</p>
+<p><code>:%s/\s\+$//</code><br>    Delete all trailing whitespace (at the end of each line).<br>    In a search, \s finds whitespace (a space or a tab), and + finds one or more occurrences.</p>
+<h3 id="11-recording-a-macro"><a href="#11-recording-a-macro" class="headerlink" title="11. recording a macro"></a>11. recording a macro</h3><p>Each register is identified by a letter <code>a</code> to <code>z</code>.</p>
+<p>To enter a macro, type:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">q&lt;letter&gt;&lt;commands&gt;q</span><br></pre></td></tr></table></figure>
+
+<p>To execute the macro <number> times (once by default), type:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;number&gt;@&lt;letter&gt;</span><br></pre></td></tr></table></figure>
+
+<p>So, the complete process looks like:</p>
+<blockquote>
+<ol>
+<li>qd  start recording to register d</li>
+<li>… your complex series of commands</li>
+<li>q   stop recording</li>
+<li>@d  execute your macro</li>
+<li>@@  execute your macro again</li>
+</ol>
+</blockquote>
+<h3 id="12-count"><a href="#12-count" class="headerlink" title="12. count"></a>12. count</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">g CTRL-G            (:h g_CTRL-G word-count byte-count)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/vim-tips/count-1.png" alt="count-1"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;Visual&#125;g CTRL-G    (:h v_g_CTRL-G)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/vim-tips/count-2.png" alt="count-2"></p>
+<h3 id="13-changing-tabs"><a href="#13-changing-tabs" class="headerlink" title="13. changing tabs"></a>13. changing tabs</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">:retab</span><br><span class="line"></span><br><span class="line">:[range]ret[ab][!] [new_tabstop]</span><br></pre></td></tr></table></figure>
+
+<p>Replace all sequences of white-space containing a <Tab> with new strings of white-space using the new tabstop value given.  If you do not specify a new tabstop size or it is zero, Vim uses the current value of ‘tabstop’.</p>
+<h3 id="14-su-write"><a href="#14-su-write" class="headerlink" title="14. su-write"></a>14. su-write</h3><p>If you find you do not have permission to perform :w, use the following:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:w !sudo tee % &gt; /dev/null</span><br></pre></td></tr></table></figure>
+
+<h3 id="15-open-file-with-specified-line-number"><a href="#15-open-file-with-specified-line-number" class="headerlink" title="15. open file with specified line number"></a>15. open file with specified line number</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ vim filename +10</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">+                    Start at end of file</span><br><span class="line">+&lt;lnum&gt;              Start at line &lt;lnum&gt;</span><br><span class="line">--cmd &lt;command&gt;      Execute &lt;command&gt; before loading any vimrc file</span><br><span class="line">-c &lt;command&gt;         Execute &lt;command&gt; after loading the first file</span><br></pre></td></tr></table></figure>
+
+<h3 id="16-jump"><a href="#16-jump" class="headerlink" title="16. jump"></a>16. jump</h3><p>In normal mode, <code>%</code> jumps to corresponding item, e.g. from an open brace to its matching closing brace.</p>
+<p>Like a web browser, you can go back, then forward:</p>
+<ul>
+<li>Press Ctrl-O to jump back to the previous (older) location.</li>
+<li>Press Ctrl-I (same as Tab) to jump forward to the next (newer) location.</li>
+</ul>
+<p>Display the jump list for the current window with:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:jumps</span><br></pre></td></tr></table></figure>
+
+<h3 id="17-format-json"><a href="#17-format-json" class="headerlink" title="17. format json"></a>17. format json</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">:%!python -m json.tool</span><br></pre></td></tr></table></figure>
+
+<h3 id="18-vim-plugin-manager"><a href="#18-vim-plugin-manager" class="headerlink" title="18. vim plugin manager"></a>18. vim plugin manager</h3><ul>
+<li><a target="_blank" rel="noopener" href="http://vi.stackexchange.com/questions/388/what-is-the-difference-between-the-vim-package-managers">What is the difference between the vim package managers?</a></li>
+<li><a target="_blank" rel="noopener" href="https://jordaneldredge.com/blog/why-i-switched-from-vundle-to-plug/">Why I switched from Vundle to Plug</a></li>
+</ul>
+<h3 id="19-useful-resources"><a href="#19-useful-resources" class="headerlink" title="19. useful resources"></a>19. useful resources</h3><ul>
+<li><a target="_blank" rel="noopener" href="http://vim.wikia.com/wiki/Vim_Tips_Wiki">Vim Tips Wiki</a></li>
+<li><a target="_blank" rel="noopener" href="http://vimawesome.com/">Vim Awesome</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2016/05/15/vim-tips/" title="Vim Tips">https://consen.github.io/2016/05/15/vim-tips/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Vim/" rel="tag"><i class="fa fa-tag"></i> Vim</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/05/21/a-question-i-will-ask-in-cpp-interview/" rel="prev" title="C++面试我一定会问的一个问题">
+                  <i class="fa fa-chevron-left"></i> C++面试我一定会问的一个问题
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/04/24/how-to-use-open-source-and-how-not-to/" rel="next" title="（译）使用开源项目，该做什么，不该做什么">
+                  （译）使用开源项目，该做什么，不该做什么 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

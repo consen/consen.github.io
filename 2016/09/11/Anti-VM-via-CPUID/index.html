@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="相对于传统的静态分析检测，动态分析技术可以获得恶意样本的详细行为信息。恶意样本作者为了规避动态检测，采取了各种手段，如Anti-VM, Anti-Sandbox, Anti-Debugging。 Anti-VM是为了检测当前运行环境是否是虚拟环境，如果是，恶意样本会停止恶意行为，让安全研究员误认为此样本是良性的。比如恶意样本如果在物理环境下运行，会去连接C&amp;C服务器，当检测到是在虚拟环境下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Anti-VM之CPUID指令">
+<meta property="og:url" content="https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="相对于传统的静态分析检测，动态分析技术可以获得恶意样本的详细行为信息。恶意样本作者为了规避动态检测，采取了各种手段，如Anti-VM, Anti-Sandbox, Anti-Debugging。 Anti-VM是为了检测当前运行环境是否是虚拟环境，如果是，恶意样本会停止恶意行为，让安全研究员误认为此样本是良性的。比如恶意样本如果在物理环境下运行，会去连接C&amp;C服务器，当检测到是在虚拟环境下">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://consen.github.io/images/MatrixBluePillRedPill2.jpg">
+<meta property="article:published_time" content="2016-09-11T13:10:03.000Z">
+<meta property="article:modified_time" content="2021-10-06T09:50:11.822Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="Anti-VM">
+<meta property="article:tag" content="CPUID">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://consen.github.io/images/MatrixBluePillRedPill2.jpg">
+
+
+<link rel="canonical" href="https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/","path":"2016/09/11/Anti-VM-via-CPUID/","title":"Anti-VM之CPUID指令"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Anti-VM之CPUID指令 | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Anti-VM之CPUID指令
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2016-09-11 21:10:03" itemprop="dateCreated datePublished" datetime="2016-09-11T21:10:03+08:00">2016-09-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Security/" itemprop="url" rel="index"><span itemprop="name">Security</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>相对于传统的静态分析检测，<strong>动态分析</strong>技术可以获得恶意样本的详细行为信息。恶意样本作者为了规避动态检测，采取了各种手段，如Anti-VM, Anti-Sandbox, Anti-Debugging。</p>
+<p><strong>Anti-VM</strong>是为了检测当前运行环境是否是虚拟环境，如果是，恶意样本会停止恶意行为，让安全研究员误认为此样本是良性的。比如恶意样本如果在物理环境下运行，会去连接C&amp;C服务器，当检测到是在虚拟环境下运行时，则去连接正常的域名。</p>
+<span id="more"></span>
+
+<p><img src="/images/MatrixBluePillRedPill2.jpg" alt="redpillbluepill"></p>
+<p>动态检测不管借助哪种虚拟化工具，如VMware、VirtualBox、Xen、KVM等，都会留下蛛丝马迹，表征当前环境是虚拟的。</p>
+<p>接下来就借助<code>CPUID</code>指令，检测当前环境是否是虚拟的。</p>
+<p><code>CPUID</code>指令用来获取CPU信息，将功能号作为参数传入<code>EAX</code>寄存器，CPUID将信息返回到<code>EAX、EBX、ECX、EDX</code>寄存器。下面是两个检测虚拟环境的功能号：</p>
+<ul>
+<li>EAX = 1，获取CPU功能信息，如果ECX第31位为1， 则表明有hypervisor存在，即环境是虚拟的。</li>
+<li>EAX = 0x40000000, 获取hypervisor信息，返回12字节长度字符串：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&quot;KVMKVMKVM\0\0\0&quot;    KVM</span><br><span class="line">&quot;Microsoft Hv&quot;       Microsoft Hyper-V or Windows Virtual PC</span><br><span class="line">&quot;VMwareVMware&quot;       VMware</span><br><span class="line">&quot;XenVMMXenVMM&quot;       Xen</span><br><span class="line">&quot;prl hyperv  &quot;       Parallels</span><br><span class="line">&quot;VBoxVBoxVBox&quot;       VirtualBox</span><br></pre></td></tr></table></figure>
+
+<p>检测代码 <a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/c/syntax/asm/cpuid2.c">cpuid.c</a> ：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TRUE  1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> FALSE 0</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">char</span>* <span class="built_in">string</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> <span class="title">cpuid_hv_bit</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> ecx;</span><br><span class="line">    <span class="function">__asm__ <span class="title">volatile</span><span class="params">(<span class="string">&quot;cpuid&quot;</span> \</span></span></span><br><span class="line"><span class="params"><span class="function">            : <span class="string">&quot;=c&quot;</span>(ecx) \</span></span></span><br><span class="line"><span class="params"><span class="function">            : <span class="string">&quot;a&quot;</span>(<span class="number">0x01</span>))</span></span>;</span><br><span class="line">    <span class="keyword">return</span> (ecx &gt;&gt; <span class="number">31</span>) &amp; <span class="number">0x1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">void</span> <span class="title">cpuid_hv_vendor_00</span><span class="params">(<span class="keyword">char</span> * vendor)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> ebx = <span class="number">0</span>, ecx = <span class="number">0</span>, edx = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function">__asm__ <span class="title">volatile</span><span class="params">(<span class="string">&quot;cpuid&quot;</span> \</span></span></span><br><span class="line"><span class="params"><span class="function">            : <span class="string">&quot;=b&quot;</span>(ebx), \</span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="string">&quot;=c&quot;</span>(ecx), \</span></span></span><br><span class="line"><span class="params"><span class="function">            <span class="string">&quot;=d&quot;</span>(edx) \</span></span></span><br><span class="line"><span class="params"><span class="function">            : <span class="string">&quot;a&quot;</span>(<span class="number">0x40000000</span>))</span></span>;</span><br><span class="line">    <span class="built_in">sprintf</span>(vendor  , <span class="string">&quot;%c%c%c%c&quot;</span>, ebx, (ebx &gt;&gt; <span class="number">8</span>), (ebx &gt;&gt; <span class="number">16</span>), (ebx &gt;&gt; <span class="number">24</span>));</span><br><span class="line">    <span class="built_in">sprintf</span>(vendor+<span class="number">4</span>, <span class="string">&quot;%c%c%c%c&quot;</span>, ecx, (ecx &gt;&gt; <span class="number">8</span>), (ecx &gt;&gt; <span class="number">16</span>), (ecx &gt;&gt; <span class="number">24</span>));</span><br><span class="line">    <span class="built_in">sprintf</span>(vendor+<span class="number">8</span>, <span class="string">&quot;%c%c%c%c&quot;</span>, edx, (edx &gt;&gt; <span class="number">8</span>), (edx &gt;&gt; <span class="number">16</span>), (edx &gt;&gt; <span class="number">24</span>));</span><br><span class="line">    vendor[<span class="number">12</span>] = <span class="number">0x00</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">cpu_hv</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> cpuid_hv_bit() ? TRUE : FALSE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">cpu_write_hv_vendor</span><span class="params">(<span class="keyword">char</span> * vendor)</span> </span>&#123;</span><br><span class="line">    cpuid_hv_vendor_00(vendor);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">cpu_known_vm_vendors</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">int</span> count = <span class="number">6</span>;</span><br><span class="line">    <span class="keyword">int</span> i;</span><br><span class="line">    <span class="keyword">char</span> cpu_hv_vendor[<span class="number">13</span>];</span><br><span class="line">    <span class="built_in">string</span> strs[count];</span><br><span class="line">    strs[<span class="number">0</span>] = <span class="string">&quot;KVMKVMKVM\0\0\0&quot;</span>; <span class="comment">/* KVM */</span></span><br><span class="line">    strs[<span class="number">1</span>] = <span class="string">&quot;Microsoft Hv&quot;</span>; <span class="comment">/* Microsoft Hyper-V or Windows Virtual PC */</span></span><br><span class="line">    strs[<span class="number">2</span>] = <span class="string">&quot;VMwareVMware&quot;</span>; <span class="comment">/* VMware */</span></span><br><span class="line">    strs[<span class="number">3</span>] = <span class="string">&quot;XenVMMXenVMM&quot;</span>; <span class="comment">/* Xen */</span></span><br><span class="line">    strs[<span class="number">4</span>] = <span class="string">&quot;prl hyperv  &quot;</span>; <span class="comment">/* Parallels */</span></span><br><span class="line">    strs[<span class="number">5</span>] = <span class="string">&quot;VBoxVBoxVBox&quot;</span>; <span class="comment">/* VirtualBox */</span></span><br><span class="line">    cpu_write_hv_vendor(cpu_hv_vendor);</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!<span class="built_in">memcmp</span>(cpu_hv_vendor, strs[i], <span class="number">12</span>)) <span class="keyword">return</span> TRUE;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> FALSE;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">char</span> cpu_hv_vendor[<span class="number">13</span>];</span><br><span class="line">    cpu_write_hv_vendor(cpu_hv_vendor);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;CPU Hypervisor Bit: %d\n&quot;</span>, cpu_hv());</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Hypervisor: %s, is known vm vendor: %s\n&quot;</span>, cpu_hv_vendor, cpu_known_vm_vendors() ? <span class="string">&quot;true&quot;</span> : <span class="string">&quot;false&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在物理机下运行结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CPU Hypervisor Bit: 0</span><br><span class="line">Hypervisor: , is known vm vendor: false</span><br></pre></td></tr></table></figure>
+
+<p>在VMware虚拟机下运行结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CPU Hypervisor Bit: 1</span><br><span class="line">Hypervisor: VMwareVMware, is known vm vendor: true</span><br></pre></td></tr></table></figure>
+
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/CPUID">Wikipedia CPUID</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.sandpile.org/x86/cpuid.htm">x86 architecture CPUID</a></li>
+<li><a target="_blank" rel="noopener" href="http://xenbits.xen.org/docs/unstable/features/feature-levelling.html">Xen Feature Levelling</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html">GCC-Inline-Assembly-HOWTO</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/a0rtega/pafish">Pafish</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/" title="Anti-VM之CPUID指令">https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Anti-VM/" rel="tag"><i class="fa fa-tag"></i> Anti-VM</a>
+              <a href="/tags/CPUID/" rel="tag"><i class="fa fa-tag"></i> CPUID</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/09/12/Anti-VM-via-RDTSC/" rel="prev" title="Anti-VM之RDTSC指令">
+                  <i class="fa fa-chevron-left"></i> Anti-VM之RDTSC指令
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/08/18/GnuPG-practice/" rel="next" title="GnuPG实战">
+                  GnuPG实战 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

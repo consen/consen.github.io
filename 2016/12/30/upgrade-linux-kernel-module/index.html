@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="目前沙箱虚拟化是基于Xen实现的，沙箱集群大概运行一两个月，会有一台服务器出现Xen卡死的情况，xl命令无法使用，虚拟机无法创建，不得不重启服务器。在项目开发初期，通过重启来解决这样的问题是可以接受的，毕竟出错的概率不是很高，但如果不从根本上解决此问题，心里就像压了一块石头。这样的产品也不能卖给客户，如果你对客户说：“服务器卡死了没关系，重启下就好”，后果会怎样？ 现在就彻底解决下这个问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Linux内核模块升级">
+<meta property="og:url" content="https://consen.github.io/2016/12/30/upgrade-linux-kernel-module/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="目前沙箱虚拟化是基于Xen实现的，沙箱集群大概运行一两个月，会有一台服务器出现Xen卡死的情况，xl命令无法使用，虚拟机无法创建，不得不重启服务器。在项目开发初期，通过重启来解决这样的问题是可以接受的，毕竟出错的概率不是很高，但如果不从根本上解决此问题，心里就像压了一块石头。这样的产品也不能卖给客户，如果你对客户说：“服务器卡死了没关系，重启下就好”，后果会怎样？ 现在就彻底解决下这个问题。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-12-30T14:14:54.000Z">
+<meta property="article:modified_time" content="2021-10-06T03:20:53.837Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="kernel">
+<meta property="article:tag" content="Xen">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://consen.github.io/2016/12/30/upgrade-linux-kernel-module/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2016/12/30/upgrade-linux-kernel-module/","path":"2016/12/30/upgrade-linux-kernel-module/","title":"Linux内核模块升级"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Linux内核模块升级 | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2016/12/30/upgrade-linux-kernel-module/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Linux内核模块升级
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2016-12-30 22:14:54" itemprop="dateCreated datePublished" datetime="2016-12-30T22:14:54+08:00">2016-12-30</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>目前沙箱虚拟化是基于Xen实现的，沙箱集群大概运行一两个月，会有一台服务器出现Xen卡死的情况，xl命令无法使用，虚拟机无法创建，不得不重启服务器。在项目开发初期，通过重启来解决这样的问题是可以接受的，毕竟出错的概率不是很高，但如果不从根本上解决此问题，心里就像压了一块石头。这样的产品也不能卖给客户，如果你对客户说：“服务器卡死了没关系，重启下就好”，后果会怎样？</p>
+<p>现在就彻底解决下这个问题。</p>
+<span id="more"></span>
+
+<p>Xen卡死后，<code>/var/log/messages</code>记录的日志中有个kernel BUG:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">Dec 23 00:51:38 w-xen09 kernel: ------------[ cut here ]------------</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: kernel BUG at drivers/xen/evtchn.c:264!</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: invalid opcode: 0000 [#3] SMP</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: Modules linked in: xt_physdev tun blktap xen_pciback xen_netback xen_blkback xen_gntalloc xen_gntdev xen_evtchn xenfs xen_privcmd bridge stp llc ipv6 ipt_MASQUERADE iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack iptable_filter ip_tables sg serio_raw gpio_ich iTCO_wdt iTCO_vendor_support hpilo hpwdt coretemp freq_table mperf crc32_pclmul crc32c_intel ghash_clmulni_intel microcode pcspkr igb ptp pps_core lpc_ich ioatdma dca acpi_power_meter hwmon shpchp ext4 jbd2 mbcache sd_mod crc_t10dif aesni_intel ablk_helper cryptd lrw gf128mul glue_helper aes_x86_64 pata_acpi ata_generic ata_piix hpsa mgag200 ttm drm_kms_helper dm_mirror dm_region_hash dm_log dm_mod</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: CPU: 11 PID: 7959 Comm: xenstored Tainted: G      D      3.10.20-11.el6.centos.alt.x86_64 #1</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: Hardware name: HP ProLiant DL360p Gen8 HY, BIOS P71 08/02/2014</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: task: ffff881003548040 ti: ffff880ff03fa000 task.ti: ffff880ff03fa000</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RIP: e030:[&lt;ffffffffa03276f8&gt;]  [&lt;ffffffffa03276f8&gt;] evtchn_bind_to_user+0xb8/0xc0 [xen_evtchn]</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RSP: e02b:ffff880ff03fbe48  EFLAGS: 00010282</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RAX: ffff880ff1490668 RBX: 00000000000000cd RCX: 0000000000000000</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RDX: 0000000000000008 RSI: 00000000000000cd RDI: ffff881001655840</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RBP: ffff880ff03fbe78 R08: 0000000000001782 R09: ffff880ff03fbe88</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: R10: 0000000000000000 R11: 0000000000000206 R12: 0000000000000000</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: R13: 00000000000000cd R14: 0000000000000000 R15: 00007fffc9028ec0</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: FS:  00007f8bf955f740(0000) GS:ffff8810a8d60000(0000) knlGS:ffff8810a8d60000</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: CS:  e033 DS: 0000 ES: 0000 CR0: 0000000080050033</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: CR2: 00007ff95089a260 CR3: 0000001002e02000 CR4: 0000000000042660</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: Stack:</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: 00000000000000fb 0000000000000001 ffff880ff03fbe78 ffff881001655840</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: 0000000000000000 0000000000084501 ffff880ff03fbec8 ffffffffa032797e</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: 00000001f03f1782 ffffffff000000cd 0000000100001782 ffff880ff03fbf40</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: Call Trace:</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: [&lt;ffffffffa032797e&gt;] evtchn_ioctl+0x13e/0x304 [xen_evtchn]</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: [&lt;ffffffff811aa349&gt;] do_vfs_ioctl+0x89/0x350</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: [&lt;ffffffff811aa6b1&gt;] SyS_ioctl+0xa1/0xb0</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: [&lt;ffffffff810e00d6&gt;] ? __audit_syscall_exit+0x246/0x2f0</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: [&lt;ffffffff815fe719&gt;] system_call_fastpath+0x16/0x1b</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: Code: 74 19 85 c0 74 04 0f 0b eb fe 48 8b 05 b2 1b 00 00 4a c7 04 e8 00 00 00 00 eb c3 48 8d 75 d0 bf 03 00 00 00 e8 da 6f 02 e1 eb d7 &lt;0f&gt; 0b eb fe 0f 1f 40 00 55 48 89 e5 48 83 ec 40 48 89 5d d8 4c</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RIP  [&lt;ffffffffa03276f8&gt;] evtchn_bind_to_user+0xb8/0xc0 [xen_evtchn]</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: RSP &lt;ffff880ff03fbe48&gt;</span><br><span class="line">Dec 23 00:51:38 w-xen09 kernel: ---[ end trace b4e323e25997f660 ]---</span><br></pre></td></tr></table></figure>
+
+<p>如果你了解Linux内核开发（不了解也没关系，可以参考下<a target="_blank" rel="noopener" href="http://www.tldp.org/LDP/lkmpg/2.6/html/index.html">The Linux Kernel Module Programming Guide</a>，这篇教程基于kernel-2.6编写的，如果你使用的内核版本比较新，如kernel-3.10，教程中一些代码可能会编译出错，因为新内核将某些模块重构了或者基于安全考虑将老版内核的一些功能屏蔽掉了），一定能马上看出这是Linux内核驱动模块xen_evtchn出了问题。</p>
+<p>kernel BUG发生在<code>drivers/xen/evtchn.c:264</code>，目前使用的内核版本是kernel-3.10.20，所以得查看kernel-3.10.20中的<a target="_blank" rel="noopener" href="https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/tree/drivers/xen/evtchn.c?h=v3.10.20">evtchn.c</a>代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">256</span>     <span class="comment">/*</span></span><br><span class="line"><span class="comment">257      * Ports are never reused, so every caller should pass in a</span></span><br><span class="line"><span class="comment">258      * unique port.</span></span><br><span class="line"><span class="comment">259      *</span></span><br><span class="line"><span class="comment">260      * (Locking not necessary because we haven&#x27;t registered the</span></span><br><span class="line"><span class="comment">261      * interrupt handler yet, and our caller has already</span></span><br><span class="line"><span class="comment">262      * serialized bind operations.)</span></span><br><span class="line"><span class="comment">263      */</span></span><br><span class="line"><span class="number">264</span>     BUG_ON(get_port_user(port) != <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+
+<p>当<code>get_port_user(port) != NULL</code>时，BUG_ON()就打印出了上面的出错信息，包括寄存器和堆栈等信息。再看下<code>get_port_user()</code>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">72</span> <span class="comment">/*</span></span><br><span class="line"><span class="comment">73  * Who&#x27;s bound to each port?  This is logically an array of struct</span></span><br><span class="line"><span class="comment">74  * per_user_data *, but we encode the current enabled-state in bit 0.</span></span><br><span class="line"><span class="comment">75  */</span></span><br><span class="line"><span class="number">76</span> <span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">long</span> *port_user;</span><br><span class="line"><span class="number">77</span> <span class="function"><span class="keyword">static</span> <span class="title">DEFINE_SPINLOCK</span><span class="params">(port_user_lock)</span></span>; <span class="comment">/* protects port_user[] and ring_prod */</span></span><br><span class="line"><span class="number">78</span></span><br><span class="line"><span class="number">79</span> <span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> struct per_user_data *<span class="title">get_port_user</span><span class="params">(<span class="keyword">unsigned</span> port)</span></span></span><br><span class="line"><span class="function">80 </span>&#123;</span><br><span class="line"><span class="number">81</span>     <span class="keyword">return</span> (struct per_user_data *)(port_user[port] &amp; ~<span class="number">1</span>);</span><br><span class="line"><span class="number">82</span> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>代码比较简单，可以看出是port重用了。而最新的内核中，此问题已经被修复掉了，见提交记录<a target="_blank" rel="noopener" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/drivers/xen/evtchn.c?id=73cc4bb0c79eebe1f0e92b700d9fe8d1c9b061bb">xen/evtchn: improve scalability by using per-user locks</a>。所以解决此问题可以升级内核，也可以只将内核模块xen_evtchn升级下，我们采用改动比较小的后者。</p>
+<p>Linux内核模块是不能跨内核使用的，也就是说给A内核编译的内核模块无法在B内核上使用，除非采取一些tricks。比如我现在运行的内核版本是kernel-3.10.20，那么给kernel-2.6.32编译的内核模块就无法在kernel-3.10.20上使用，写个简单的demo说明下。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ uname -r</span><br><span class="line">3.10.20-11.el6.centos.alt.x86_64</span><br></pre></td></tr></table></figure>
+
+<p>最简单的内核模块，<a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/linux/kernel-module/hello-2.6/hello.c">hello world</a>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/module.h&gt;</span>   <span class="comment">/* Needed by all modules */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/kernel.h&gt;</span>   <span class="comment">/* Needed for KERN_INFO */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;linux/init.h&gt;</span>     <span class="comment">/* Needed for the macros */</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> __init <span class="title">hello_init</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(KERN_INFO <span class="string">&quot;Hello, world\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> __exit <span class="title">hello_exit</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    printk(KERN_INFO <span class="string">&quot;Goodbye, world\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">module_init(hello_init);</span><br><span class="line">module_exit(hello_exit);</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/linux/kernel-module/hello-2.6/Makefile">Makefile</a>文件，注意指定的版本号是kernel-2.6.32:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">obj-m += hello.o</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">        make -C /lib/modules/2.6.32-220.el6.x86_64/build M=$(PWD) modules</span><br><span class="line"></span><br><span class="line">clean:</span><br><span class="line">        make -C /lib/modules/2.6.32-220.el6.x86_64/build M=$(PWD) clean</span><br></pre></td></tr></table></figure>
+
+<p>编译，生成hello.ko文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ make</span><br><span class="line">make -C /lib/modules/2.6.32-220.el6.x86_64/build M=/data1/home/xikangjie/github/demo/linux/kernel-module/hello-2.6 modules</span><br><span class="line">make[1]: Entering directory `/usr/src/kernels/2.6.32-220.el6.x86_64&#x27;</span><br><span class="line">  CC [M]  /data1/home/xikangjie/github/demo/linux/kernel-module/hello-2.6/hello.o</span><br><span class="line">  Building modules, stage 2.</span><br><span class="line">  MODPOST 1 modules</span><br><span class="line">  CC      /data1/home/xikangjie/github/demo/linux/kernel-module/hello-2.6/hello.mod.o</span><br><span class="line">  LD [M]  /data1/home/xikangjie/github/demo/linux/kernel-module/hello-2.6/hello.ko.unsigned</span><br><span class="line">  NO SIGN [M] /data1/home/xikangjie/github/demo/linux/kernel-module/hello-2.6/hello.ko</span><br><span class="line">make[1]: Leaving directory `/usr/src/kernels/2.6.32-220.el6.x86_64&#x27;</span><br><span class="line">$ ls</span><br><span class="line">hello.c  hello.ko  hello.ko.unsigned  hello.mod.c  hello.mod.o  hello.o  Makefile  modules.order  Module.symvers</span><br></pre></td></tr></table></figure>
+
+<p>插入内核模块，可以发现会出错，因为与当前内核版本不匹配，这个内核模块只能在kernel-2.6.32-220.el6.x86_64上正常运行:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo insmod ./hello.ko</span><br><span class="line">insmod: error inserting &#x27;./hello.ko&#x27;: -1 Invalid module format</span><br></pre></td></tr></table></figure>
+
+<p>同时，<code>/var/log/messages</code>中对应的日志信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kernel: hello: disagrees about version of symbol module_layout</span><br></pre></td></tr></table></figure>
+
+<p>将Makefile中的内核版本改为当前内核版本，<code>/lib/modules/$(shell uname -r)/build</code>，重新编译下，hello.ko就可正常加载了，同时<code>/var/log/messages</code>也输出了<code>Hello, world</code>。</p>
+<p>使用的是kernel-3.10.20，最好就在kernel-3.10.20的开发环境下将新版xen_evtchn重新编译下。需要注意的是，如果新版xen_evtchn使用了新内核提供的一些功能，是无法在kernel-3.10.20上编译的，只能使用新版内核开发环境。所以只需要拿到修复了Xen卡死问题的evtchn.c代码即可，不需要是最新，我们选用提交<a target="_blank" rel="noopener" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/drivers/xen/evtchn.c?id=af09d1a73aed4e83ee095f2dabdc09386e31f2ea">xen: remove deprecated IRQF_DISABLED</a>中的<a target="_blank" rel="noopener" href="https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/drivers/xen/evtchn.c?id=af09d1a73aed4e83ee095f2dabdc09386e31f2ea">evtchn.c</a>代码，既将Xen卡死问题解决了，又没有使用新版内核功能，可以在kernel-3.10.20上编译。</p>
+<p>然后安装当前内核kernel-3.10.20的开发环境，即一堆头文件，在CentOS下是kernel-devel-3.10.20-11.el6.centos.alt.x86_64.rpm：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ yum info kernel-devel-3.10.20-11.el6.centos.alt.x86_64</span><br><span class="line">Installed Packages</span><br><span class="line">Name        : kernel-devel</span><br><span class="line">Arch        : x86_64</span><br><span class="line">Version     : 3.10.20</span><br><span class="line">Release     : 11.el6.centos.alt</span><br><span class="line">Size        : 32 M</span><br><span class="line">Repo        : installed</span><br><span class="line">Summary     : Development package for building kernel modules to match the kernel.</span><br><span class="line">URL         : http://www.kernel.org/</span><br><span class="line">License     : GPLv2</span><br><span class="line">Description : This package provides the kernel header files and makefiles</span><br><span class="line">            : sufficient to build modules against the kernel package.</span><br></pre></td></tr></table></figure>
+
+<p>安装好后会有目录<code>/usr/src/kernels/3.10.20-11.el6.centos.alt.x86_64/</code>，而且可以发现当前内核版本中/lib/modules/3.10.20-11.el6.centos.alt.x86_64/build链接也正常显示了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">build -&gt; ../../../usr/src/kernels/3.10.20-11.el6.centos.alt.x86_64</span><br></pre></td></tr></table></figure>
+
+<p>接着编写Makefile：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">obj-m += xen-evtchn.o</span><br><span class="line">xen-evtchn-objs := evtchn.o</span><br><span class="line"></span><br><span class="line">all:</span><br><span class="line">        make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules</span><br><span class="line"></span><br><span class="line">clean:</span><br><span class="line">        make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean</span><br></pre></td></tr></table></figure>
+
+<p>运行<code>make</code>命令编译，生成内核模块<code>xen-evtchn.ko</code>，拷贝到/lib/modules/3.10.20-11.el6.centos.alt.x86_64/kernel/drivers/xen/目录下，将老版<code>xen-evtchn.ko</code>覆盖（以防万一，可以将老版<code>xen-evtchn.ko</code>先备份下），<code>reboot</code>重启系统。</p>
+<hr>
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.tldp.org/LDP/lkmpg/2.6/html/index.html">The Linux Kernel Module Programming Guide</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/kbuild/makefiles.txt">Linux Kernel Makefiles</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2016/12/30/upgrade-linux-kernel-module/" title="Linux内核模块升级">https://consen.github.io/2016/12/30/upgrade-linux-kernel-module/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/kernel/" rel="tag"><i class="fa fa-tag"></i> kernel</a>
+              <a href="/tags/Xen/" rel="tag"><i class="fa fa-tag"></i> Xen</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/12/31/goodbye-2016-hello-2017/" rel="prev" title="2016年终总结，恭贺2017">
+                  <i class="fa fa-chevron-left"></i> 2016年终总结，恭贺2017
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/12/16/upgrade-xen45-to-xen48/" rel="next" title="升级Xen 4.5到Xen 4.8">
+                  升级Xen 4.5到Xen 4.8 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

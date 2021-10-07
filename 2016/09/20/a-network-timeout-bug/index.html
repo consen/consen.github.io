@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="在cuckoo上测试我的xenforce，任务运行结果出现大量timeout错误，虽然以前也遇到过这个问题，但没当回事放过去了，现在有了xenforce还出现这种问题，是可忍孰不可忍，今天就认真排查下这个问题，消灭这只bug。 Bug现象是这样的，任务运行超时，错误日志有两种：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络连接为什么超时了">
+<meta property="og:url" content="https://consen.github.io/2016/09/20/a-network-timeout-bug/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="在cuckoo上测试我的xenforce，任务运行结果出现大量timeout错误，虽然以前也遇到过这个问题，但没当回事放过去了，现在有了xenforce还出现这种问题，是可忍孰不可忍，今天就认真排查下这个问题，消灭这只bug。 Bug现象是这样的，任务运行超时，错误日志有两种：">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/agent_netstat.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/xmlrpc_demo.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/socket_tcpflow.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/server.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/server_netstat.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/client1.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/server_netstat.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/client1_2.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/client1_netstat1.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/client1_netstat2.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/client2.png">
+<meta property="og:image" content="https://consen.github.io/images/a-network-timeout-bug/client2_netstat.png">
+<meta property="article:published_time" content="2016-09-20T13:34:21.000Z">
+<meta property="article:modified_time" content="2021-10-06T09:51:18.200Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="Process">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://consen.github.io/images/a-network-timeout-bug/agent_netstat.png">
+
+
+<link rel="canonical" href="https://consen.github.io/2016/09/20/a-network-timeout-bug/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2016/09/20/a-network-timeout-bug/","path":"2016/09/20/a-network-timeout-bug/","title":"网络连接为什么超时了"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>网络连接为什么超时了 | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2016/09/20/a-network-timeout-bug/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络连接为什么超时了
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2016-09-20 21:34:21" itemprop="dateCreated datePublished" datetime="2016-09-20T21:34:21+08:00">2016-09-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Network/" itemprop="url" rel="index"><span itemprop="name">Network</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在cuckoo上测试我的xenforce，任务运行结果出现大量timeout错误，虽然以前也遇到过这个问题，但没当回事放过去了，现在有了xenforce还出现这种问题，是可忍孰不可忍，今天就认真排查下这个问题，消灭这只bug。</p>
+<p>Bug现象是这样的，任务运行超时，错误日志有两种：</p>
+<span id="more"></span>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2016-09-20 14:08:58,540 [lib.cuckoo.core.scheduler] ERROR: vm-111: the guest initialization hit the critical timeout, analysis aborted.</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2016-09-20 14:04:27,790 [lib.cuckoo.core.guest] DEBUG: vm-117: error retrieving status: timed out</span><br><span class="line">2016-09-20 14:04:28,799 [lib.cuckoo.core.scheduler] ERROR: The analysis hit the critical timeout, terminating.</span><br></pre></td></tr></table></figure>
+
+<p>还有另外一种情况，没错误，但运行时间也超出正常值，时间主要消耗在这里：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">2016-09-20 19:06:52,752 [lib.cuckoo.core.guest] DEBUG: vm-103: waiting for status 0x0001</span><br><span class="line">2016-09-20 19:08:52,803 [lib.cuckoo.core.guest] DEBUG: vm-103: not ready yet</span><br></pre></td></tr></table></figure>
+
+<p>总之，是访问虚拟机内agent.py提供的XMLRPC服务出现了超时问题。Why？为什么会超时？这影响的因素就太多了，只能一条条排除。</p>
+<p>首先排除掉网络配置问题，xenforce在网络配置上做了优化，虚拟机快照恢复后，立马自动配置IP地址，可正常访问网络。观察日志，以及虚拟机内检测包和外部resultserver的正常通信也证实了我的想法。</p>
+<p>是虚拟机环境问题导致的吗？虚拟机是通过快照恢复的，也就是说环境都是一样的，先排除掉。</p>
+<p>既然是网络连接问题，先在主机上看下网络连接(8000是agent.py提供的XMLRPC服务端口，这里只列出了部分netstat输出结果)：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># netstat -anp | grep :8000</span><br><span class="line">tcp        0      0 172.16.1.1:53033            172.16.1.108:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:37476            172.16.1.122:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:36381            172.16.1.110:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:50635            172.16.1.112:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:50222            172.16.1.104:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:34851            172.16.1.103:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:46671            172.16.1.121:8000           ESTABLISHED 32445/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:53098            172.16.1.113:8000           ESTABLISHED 30667/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:46680            172.16.1.121:8000           ESTABLISHED 336/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:44107            172.16.1.123:8000           ESTABLISHED 32559/tcpdump</span><br><span class="line">tcp        0      0 172.16.1.1:53634            172.16.1.116:8000           CLOSE_WAIT  336/tcpdump</span><br></pre></td></tr></table></figure>
+
+<p>像CLOSE_WAIT, TIME_WAIT这种状态，大量出现一般是有问题的。另外，还有<strong>一个更有意思的现象</strong>，这些网络连接为什么显示是<code>tcpdump</code>进程建立的？Why？<code>tcpdump</code>就一个抓包进程，怎么会去访问XMLRPC服务。哦？哦！**<code>tcpdump</code>进程是以子进程形式启动的，继承了父进程建立的网络连接，所以才会有上面的显示。**</p>
+<p>直觉问题就出在<code>tcpdump</code>。</p>
+<p>关掉抓包模块，跑了一遍测试，没有timeout错误，又跑了一遍，仍然没有。:)</p>
+<p><code>tcpdump</code>进程是用<code>subprocess</code>模块启动的，将<code>subprocess.Popen()</code>的<code>close_fds</code>参数设置为<code>True</code>，子进程启动时，关闭从父进程继承的文件描述符。跑了一遍测试，没有timeout错误，又跑了一遍，仍然没有。:)</p>
+<p>接着排查。</p>
+<p>观察发现当tcpdump进程继承的网络连接状态显示为ESTABLISHED时，虚拟机内的agent.py就会卡住，对外面的请求没有响应。如:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tcp        0      0 172.16.1.1:44727            172.16.1.121:8000           ESTABLISHED 32445/tcpdump</span><br></pre></td></tr></table></figure>
+
+<p>172.16.1.121这台虚拟机就会出现问题，agent.py卡住，长时间没响应，于是外面访问时出现超时问题。在虚拟机内部观察netstat状态：</p>
+<p><img src="/images/a-network-timeout-bug/agent_netstat.png" alt="netstat"></p>
+<p>将对应的tcpdump进程手动kill掉，ESTABLISHED连接状态消失，agent.py恢复正常，可正常响应请求。</p>
+<p>问题来了，要找到根本原因得回答下面的问题：</p>
+<ol>
+<li>ESTABLISHED，CLOSE_WAIT状态是怎么出现的？</li>
+<li>tcpdump进程继承的连接为什么会导致这些状态出现？</li>
+<li>这些状态出现时，agent.py为什么会卡住没响应？</li>
+</ol>
+<hr>
+<p>(2016.09.21 10:34更新)</p>
+<p>先回答问题3， Python的SimpleXMLRPCServer是单线程的，串行执行请求，也就是说每次只能处理一个请求，当有请求正在处理，新的请求会阻塞住，就会出现agent.py卡住没响应的现象。</p>
+<p>写个简单的demo测试下：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/python/library/SimpleXMLRPCServer/function_server.py">function_server.py</a>，提供一个简单的XMLRPC服务。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> SimpleXMLRPCServer <span class="keyword">import</span> SimpleXMLRPCServer</span><br><span class="line"><span class="keyword">import</span> logging</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="comment"># Set up logging</span></span><br><span class="line">logging.basicConfig(level=logging.DEBUG)</span><br><span class="line"></span><br><span class="line">server = SimpleXMLRPCServer((<span class="string">&#x27;localhost&#x27;</span>, <span class="number">9090</span>), logRequests=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Expose a function</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">list_contents</span>(<span class="params">dir_name</span>):</span></span><br><span class="line">    logging.debug(<span class="string">&#x27;list_contents(%s)&#x27;</span>, dir_name)</span><br><span class="line">    time.sleep(<span class="number">20</span>)</span><br><span class="line">    <span class="keyword">return</span> os.listdir(dir_name)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">list_contents2</span>(<span class="params">dir_name</span>):</span></span><br><span class="line">    logging.debug(<span class="string">&#x27;list_contents(%s)&#x27;</span>, dir_name)</span><br><span class="line">    <span class="keyword">return</span> os.listdir(dir_name)</span><br><span class="line"></span><br><span class="line">server.register_function(list_contents)</span><br><span class="line">server.register_function(list_contents2)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;Use Control-C to exit&#x27;</span></span><br><span class="line">    server.serve_forever()</span><br><span class="line"><span class="keyword">except</span> KeyboardInterrupt:</span><br><span class="line">    <span class="built_in">print</span> <span class="string">&#x27;Exiting&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/python/library/SimpleXMLRPCServer/function_client.py">function_client.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> xmlrpclib</span><br><span class="line"></span><br><span class="line">proxy = xmlrpclib.ServerProxy(<span class="string">&#x27;http://localhost:9090&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span> proxy.list_contents(<span class="string">&#x27;./&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/python/library/SimpleXMLRPCServer/function_client2.py">function_client2.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> xmlrpclib</span><br><span class="line"></span><br><span class="line">proxy = xmlrpclib.ServerProxy(<span class="string">&#x27;http://localhost:9090&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span> proxy.list_contents2(<span class="string">&#x27;./&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>先启动function_client.py，由于list_contents()会sleep 20s，模拟XMLRPC服务正在长时间处理当前请求。</p>
+<p>再启动fuction_client2.py，由于XMLRPC服务正在处理function_client.py的list_contents()请求，list_contents2()请求会被阻塞住，没响应。</p>
+<p><img src="/images/a-network-timeout-bug/xmlrpc_demo.png" alt="xmlprc demo"></p>
+<p>这就解释了虚拟机内agent.py提供的XMLRPC服务，为什么会出现无响应的现象，因为有连接建立，有正在处理的请求，<strong>见上面虚拟机内netstat截图中ESTABLISHED状态的连接</strong>。</p>
+<hr>
+<p>（2016.09.22 21:32更新）</p>
+<p>接着回答问题1和2。</p>
+<p>ESTABLISHED，CLOSE_WAIT状态是怎么出现的？先看下TCP协议状态转换图：</p>
+<p><img src="/images/a-network-timeout-bug/socket_tcpflow.png" alt="tcpflow"></p>
+<p>TCP连接建立后客户端和服务端进入ESTABLISHED状态，主动关闭连接的一方会进入TIME_WAIT状态，被动关闭连接的一方会进入CLOSE_WAIT状态。</p>
+<p>那么虚拟机内ESTABLISHED，CLOSE_WAIT状态到底是怎么出现的？我又将Bug复现了1遍，仔细观察netstat输出，终于发现了猫腻。下面只抽取了172.16.1.102虚拟机Bug出现时的网络连接状态。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># netstat -anp | grep :8000</span><br><span class="line">tcp        0      1 172.16.1.1:41240            172.16.1.102:8000           SYN_SENT    3571/python</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># netstat -anp | grep :8000</span><br><span class="line">tcp        0      0 172.16.1.1:41262            172.16.1.102:8000           FIN_WAIT2   -</span><br><span class="line">tcp        0      0 172.16.1.1:41265            172.16.1.102:8000           ESTABLISHED 3571/python</span><br><span class="line">tcp        0      0 172.16.1.1:41240            172.16.1.102:8000           ESTABLISHED 8805/tcpdump</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意看这个连接(172.16.1.1:41240 172.16.1.102:8000)，父进程请求完毕后，此连接并没有关闭，因为还被子进程占用着，所以在子进程中仍显示为ESTABLISHED状态。</strong></p>
+<p>写个简单的demo把Bug复现下，更清楚地解释Bug出现的原因。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/python/library/socket/echo_server_tcp.py">echo_server_tcp.py</a>，接收请求并把请求数据又返回给客户端。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a TCP/IP socket</span></span><br><span class="line">sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line"><span class="comment"># Bind the socket to the port</span></span><br><span class="line">server_address = (<span class="string">&#x27;localhost&#x27;</span>, <span class="number">10000</span>)</span><br><span class="line"><span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;starting up on %s port %s&#x27;</span> % server_address</span><br><span class="line">sock.bind(server_address)</span><br><span class="line"><span class="comment"># Calling listen() puts the socket into server mode, and accept() waits for an</span></span><br><span class="line"><span class="comment"># incoming connection.</span></span><br><span class="line"><span class="comment"># Listen for incoming connections</span></span><br><span class="line">sock.listen(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">    <span class="comment"># Wait for a connection</span></span><br><span class="line">    <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;waiting for a connection&#x27;</span></span><br><span class="line">    connection, client_address = sock.accept()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;connection from&#x27;</span>, client_address</span><br><span class="line">        <span class="comment"># Receive the data in small chunks and retransmit it</span></span><br><span class="line">        <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">            data = connection.recv(<span class="number">16</span>)</span><br><span class="line">            <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;received &quot;%s&quot;&#x27;</span> % data</span><br><span class="line">            <span class="keyword">if</span> data:</span><br><span class="line">                <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;sending data back to the client&#x27;</span></span><br><span class="line">                connection.sendall(data)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;no more data from&#x27;</span>, client_address</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        <span class="comment"># Clean up the connection</span></span><br><span class="line">        connection.close()</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/python/library/socket/echo_client_tcp_child.py">echo_client_tcp_child.py</a>，发送请求，并启动了一个子进程cat，子进程会继承父进程的sock。sleep 20s方便观察netstat状态。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a TCP/IP socket</span></span><br><span class="line">sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line"></span><br><span class="line">cmd = [<span class="string">&quot;cat&quot;</span>]</span><br><span class="line">proc = subprocess.Popen(cmd)</span><br><span class="line"><span class="built_in">print</span> proc.pid</span><br><span class="line"></span><br><span class="line"><span class="comment"># For netstat and lsof</span></span><br><span class="line">time.sleep(<span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Connect the socket to the port where the server is listening</span></span><br><span class="line">server_address = (<span class="string">&#x27;localhost&#x27;</span>, <span class="number">10000</span>)</span><br><span class="line"><span class="built_in">print</span> &gt;&gt;sys.stdout, <span class="string">&#x27;connecting to %s port %s&#x27;</span> % server_address</span><br><span class="line">sock.connect(server_address)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># Send data</span></span><br><span class="line">    message = <span class="string">&#x27;This is the message. It will be repeated.&#x27;</span></span><br><span class="line">    <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;sending &quot;%s&quot;&#x27;</span> % message</span><br><span class="line">    sock.sendall(message)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Look for the response</span></span><br><span class="line">    amount_received = <span class="number">0</span></span><br><span class="line">    amount_expected = <span class="built_in">len</span>(message)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> amount_received &lt; amount_expected:</span><br><span class="line">        data = sock.recv(<span class="number">16</span>)</span><br><span class="line">        amount_received += <span class="built_in">len</span>(data)</span><br><span class="line">        <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;received &quot;%s&quot;&#x27;</span> % data</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;closing socket&#x27;</span></span><br><span class="line">    time.sleep(<span class="number">20</span>)  <span class="comment"># For netstat</span></span><br><span class="line">    sock.close()</span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/consen/demo/blob/master/python/library/socket/echo_client_tcp.py">echo_client_tcp.py</a>，这个和echo_client_tcp_child.py是一样的，只不过取消掉了启动子进程和sleep 20s，立即发送请求。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> socket</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a TCP/IP socket</span></span><br><span class="line">sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Connect the socket to the port where the server is listening</span></span><br><span class="line">server_address = (<span class="string">&#x27;localhost&#x27;</span>, <span class="number">10000</span>)</span><br><span class="line"><span class="built_in">print</span> &gt;&gt;sys.stdout, <span class="string">&#x27;connecting to %s port %s&#x27;</span> % server_address</span><br><span class="line">sock.connect(server_address)</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="comment"># Send data</span></span><br><span class="line">    message = <span class="string">&#x27;This is the message. It will be repeated.&#x27;</span></span><br><span class="line">    <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;sending &quot;%s&quot;&#x27;</span> % message</span><br><span class="line">    sock.sendall(message)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Look for the response</span></span><br><span class="line">    amount_received = <span class="number">0</span></span><br><span class="line">    amount_expected = <span class="built_in">len</span>(message)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> amount_received &lt; amount_expected:</span><br><span class="line">        data = sock.recv(<span class="number">16</span>)</span><br><span class="line">        amount_received += <span class="built_in">len</span>(data)</span><br><span class="line">        <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;received &quot;%s&quot;&#x27;</span> % data</span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    <span class="built_in">print</span> &gt;&gt;sys.stderr, <span class="string">&#x27;closing socket&#x27;</span></span><br><span class="line">    sock.close()</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>启动服务：</li>
+</ul>
+<p><img src="/images/a-network-timeout-bug/server.png" alt="server"></p>
+<p>此时的netstat：</p>
+<p><img src="/images/a-network-timeout-bug/server_netstat.png"></p>
+<ul>
+<li>启动echo_client_tcp_child.py：</li>
+</ul>
+<p><img src="/images/a-network-timeout-bug/client1.png"></p>
+<p>此时的netstat:</p>
+<p><img src="/images/a-network-timeout-bug/server_netstat.png"></p>
+<p>观察lsof输出，可以发现子进程已经继承了父进程的sock。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ lsof -p 16696</span><br><span class="line">COMMAND   PID      USER   FD   TYPE DEVICE  SIZE/OFF       NODE NAME</span><br><span class="line">cat     16696 xikangjie    3u  sock    0,7       0t0   13005348 can&#x27;t identify protocol</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>echo_client_tcp_child.py运行结束但还没调用sock.close():</li>
+</ul>
+<p><img src="/images/a-network-timeout-bug/client1_2.png"></p>
+<p><img src="/images/a-network-timeout-bug/client1_netstat1.png"></p>
+<ul>
+<li>echo_client_tcp_child.py调用sock.close()，关闭连接(127.0.0.1:46126 127.0.0.1:10000)，可以看到此连接在子进程中仍显示为ESTABLISHED状态:</li>
+</ul>
+<p><img src="/images/a-network-timeout-bug/client1_netstat2.png"></p>
+<ul>
+<li>启动echo_client_tcp.py，可以看到阻塞住，无法发送请求:</li>
+</ul>
+<p><img src="/images/a-network-timeout-bug/client2.png"></p>
+<p>此时的netstat:</p>
+<p><img src="/images/a-network-timeout-bug/client2_netstat.png"></p>
+<ul>
+<li>将cat进程退出后，可立即发送请求。</li>
+</ul>
+<hr>
+<p>（2016.09.23 10:24更新）</p>
+<p>给Cukoo提交的Pull Request已经merge到master分支：<a target="_blank" rel="noopener" href="https://github.com/cuckoosandbox/cuckoo/pull/1100">Fix agent.py timeout error caused by tcpdump process.</a></p>
+<hr>
+<p>总结：</p>
+<p>理解此Bug需要搞明白子进程继承了父进程的文件描述符（网络连接也是文件描述符的一种）会有什么影响。简单讲就是子进程继承了父进程的网络连接，父进程关闭网络连接后，由于此连接也被子进程占用，所以没有真正关闭，导致服务器无法响应新的请求。</p>
+<ol>
+<li>解决Bug的第一步是把Bug复现，用最简单的方法把Bug复现，就相当于把Bug解决了一半。</li>
+<li>多积累技术基础，才能透过现象看到本质。</li>
+</ol>
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://typecodes.com/cseries/tcpdumpwiresharkclosewait1.html">使用TCPDUMP和Wireshark排查服务端CLOSE_WAIT（一）</a></li>
+<li><a target="_blank" rel="noopener" href="https://typecodes.com/cseries/tcpdumpwiresharkclosewait2.html">使用TCPDUMP和Wireshark排查服务端CLOSE_WAIT（二）</a></li>
+<li><a target="_blank" rel="noopener" href="http://mail-archives.apache.org/mod_mbox/ws-xmlrpc-user/200411.mbox/%3CFEFA185A-395A-11D9-BBB9-000A95B9441C@wilson.co.uk%3E">ws-xmlrpc-user mailing list archives</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2016/09/20/a-network-timeout-bug/" title="网络连接为什么超时了">https://consen.github.io/2016/09/20/a-network-timeout-bug/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Process/" rel="tag"><i class="fa fa-tag"></i> Process</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/10/09/trip-to-japan/" rel="prev" title="日本之行">
+                  <i class="fa fa-chevron-left"></i> 日本之行
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/09/12/Anti-VM-via-RDTSC/" rel="next" title="Anti-VM之RDTSC指令">
+                  Anti-VM之RDTSC指令 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

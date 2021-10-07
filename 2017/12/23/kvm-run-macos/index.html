@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="最近尝试基于Xen运行macOS操作系统，之前已经有人做过类似的研究：  Snow Leopard Server on Xen MACOS XEN: SNOW LEOPARD AS GUEST ON A XEN DOMU Qubes 3 MacOSX  虽然可正常运行，但缺少后续研究，也没有官方支持，所以目前为止Xen只能勉强运行老版本OSX操作系统。运行OSX系统，需要对Xen hypervis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="KVM运行macOS">
+<meta property="og:url" content="https://consen.github.io/2017/12/23/kvm-run-macos/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="最近尝试基于Xen运行macOS操作系统，之前已经有人做过类似的研究：  Snow Leopard Server on Xen MACOS XEN: SNOW LEOPARD AS GUEST ON A XEN DOMU Qubes 3 MacOSX  虽然可正常运行，但缺少后续研究，也没有官方支持，所以目前为止Xen只能勉强运行老版本OSX操作系统。运行OSX系统，需要对Xen hypervis">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://consen.github.io/images/kvm-run-macos/macos_10.12.jpg">
+<meta property="og:image" content="https://consen.github.io/images/kvm-run-macos/macos-network.jpg">
+<meta property="og:image" content="https://consen.github.io/images/kvm-run-macos/macos101-en0.png">
+<meta property="og:image" content="https://consen.github.io/images/kvm-run-macos/macos101-ping.png">
+<meta property="og:image" content="https://consen.github.io/images/kvm-run-macos/macos101-tcpdump.png">
+<meta property="article:published_time" content="2017-12-23T12:08:22.000Z">
+<meta property="article:modified_time" content="2021-10-06T09:50:11.822Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="KVM">
+<meta property="article:tag" content="macOS">
+<meta property="article:tag" content="TAP">
+<meta property="article:tag" content="bridge">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://consen.github.io/images/kvm-run-macos/macos_10.12.jpg">
+
+
+<link rel="canonical" href="https://consen.github.io/2017/12/23/kvm-run-macos/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2017/12/23/kvm-run-macos/","path":"2017/12/23/kvm-run-macos/","title":"KVM运行macOS"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>KVM运行macOS | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-text">准备工作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85macOS"><span class="nav-text">安装macOS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE"><span class="nav-text">网络配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E6%A1%A5virbr0%E5%88%9B%E5%BB%BA"><span class="nav-text">网桥virbr0创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#iptables-SNAT"><span class="nav-text">iptables SNAT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dnsmasq"><span class="nav-text">dnsmasq</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BD%91%E5%8D%A1%E9%85%8D%E7%BD%AE"><span class="nav-text">虚拟机网卡配置</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2017/12/23/kvm-run-macos/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          KVM运行macOS
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-12-23 20:08:22" itemprop="dateCreated datePublished" datetime="2017-12-23T20:08:22+08:00">2017-12-23</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Virtualization/" itemprop="url" rel="index"><span itemprop="name">Virtualization</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近尝试基于Xen运行macOS操作系统，之前已经有人做过类似的研究：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://wiki.osx86project.org/wiki/index.php/Snow_Leopard_Server_on_Xen">Snow Leopard Server on Xen</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.bisente.com/2011/03/15/macos-xen-snow-leopard-as-guest-on-a-xen-domu/">MACOS XEN: SNOW LEOPARD AS GUEST ON A XEN DOMU</a></li>
+<li><a target="_blank" rel="noopener" href="https://groups.google.com/forum/#!msg/qubes-users/RiVntUzgJmY/rXMtXD3WKQAJ">Qubes 3 MacOSX</a></li>
+</ul>
+<p>虽然可正常运行，但缺少后续研究，也没有官方支持，所以目前为止Xen只能勉强运行老版本OSX操作系统。运行OSX系统，需要对Xen hypervisor进行修改，如支持MSR 0x35，OSX系统启动时需要据此确定CPU核心数和线程数，但是这个特性连Intel官方开发文档都没有明确说明，所以Xen官方拒绝将此修改合并到Xen主分支代码。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://lists.xen.org/archives/html/xen-devel/2014-09/msg02524.html">Xen-devel PATCH x86/hvm: add support for MSR 0x35</a></li>
+<li><a target="_blank" rel="noopener" href="https://lists.xen.org/archives/html/xen-devel/2014-09/msg02525.html">Xen-devel PATCH x86/traps: hypervisor leaf 0x40000010 timing info</a></li>
+</ul>
+<p>自己在本地修改Xen源码，虽然可安装、启动OSX-10.10系统，但还是遇到了其他问题，如外设模拟、系统驱动等，所以系统还是没法正常使用，只好作罢，转而投向更加活跃、有社区支持的<a target="_blank" rel="noopener" href="https://github.com/kholia/OSX-KVM">OSX-KVM</a>项目，基于KVM运行macOS系统。</p>
+<span id="more"></span>
+
+<h2 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h2><p>运行KVM需要CPU支持虚拟化扩展，即Intel VT-x或AMD SVM，如果功能没开启，需要在BISO开启。运行OSX需要KVM和QEMU支持，对KVM和QEMU的修改都已合并到主分支代码，如果系统自带的KVM或QEMU版本太老，OSX是无法正常运行的，至少需要Linux kernel &gt;= 4.7，QEMU &gt;= 2.6。</p>
+<p>在<a target="_blank" rel="noopener" href="https://www.kernel.org/">The Linux Kernel Archives</a>下载最新稳定版Linux内核编译安装，注意KVM相关虚拟化参数配置。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ uname -r</span><br><span class="line">4.14.0</span><br></pre></td></tr></table></figure>
+
+<p>加载KVM内核模块：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ sudo modprobe kvm_intel</span><br><span class="line">$ lsmod | grep kvm</span><br><span class="line">kvm_intel             192512  0</span><br><span class="line">kvm                   512000  1 kvm_intel</span><br><span class="line">irqbypass              16384  1 kvm</span><br></pre></td></tr></table></figure>
+
+<p>在<a target="_blank" rel="noopener" href="https://www.qemu.org/download/#source">Download QEMU</a>下载最新稳定版QEMU编译安装。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ /usr/local/bin/qemu-system-x86_64 --version</span><br><span class="line">QEMU emulator version 2.11.0</span><br><span class="line">Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project developers</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装macOS"><a href="#安装macOS" class="headerlink" title="安装macOS"></a>安装macOS</h2><p>接着按照<a target="_blank" rel="noopener" href="https://github.com/kholia/OSX-KVM">OSX-KVM</a>系统安装文档，安装macOS系统。我直接使用的<code>qemu-system-x86_64</code>，没有借助<code>libvirt</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ cat boot-macOS.sh</span><br><span class="line">qemu-system-x86_64 -enable-kvm -m 2048 -cpu Penryn,kvm=off,vendor=GenuineIntel \</span><br><span class="line">      -machine pc-q35-2.4 \</span><br><span class="line">      -smp 2,cores=1 \</span><br><span class="line">      -usb -device usb-kbd -device usb-tablet \</span><br><span class="line">      -device isa-applesmc,osk=&quot;ourhardworkbythesewordsguardedpleasedontsteal(c)AppleComputerInc&quot; \</span><br><span class="line">      -kernel ./enoch_rev2902_boot \</span><br><span class="line">      -smbios type=2 \</span><br><span class="line">      -device ich9-intel-hda -device hda-duplex \</span><br><span class="line">      -device ide-drive,bus=ide.2,drive=MacHDD \</span><br><span class="line">      -drive id=MacHDD,if=none,file=./mac_hdd.img \</span><br><span class="line">      -netdev tap,id=net0,ifname=tap0,script=no,downscript=no -device e1000-82545em,netdev=net0,id=net0,mac=52:54:00:c9:18:27 \</span><br><span class="line">      -monitor stdio \</span><br><span class="line">      -device ide-drive,bus=ide.0,drive=MacDVD \</span><br><span class="line">      -drive id=MacDVD,if=none,snapshot=on,file=./&#x27;Install_macOS_Sierra_OS_X_10.12.iso&#x27;</span><br><span class="line">      -vnc 0.0.0.0:0 -k en-us</span><br></pre></td></tr></table></figure>
+
+<p>安装完，将MacDVD -device及ISO -drive配置注释掉，启动虚拟机。</p>
+<p><img src="/images/kvm-run-macos/macos_10.12.jpg" alt="macos_sierra"></p>
+<h2 id="网络配置"><a href="#网络配置" class="headerlink" title="网络配置"></a>网络配置</h2><p>虚拟机可正常运行后，接下来最重要的工作是网络配置，使虚拟机可正常连接网络。</p>
+<p>既想让虚拟机可连接外网（但不暴露给外网，外网不能直接访问虚拟机），又不影响主机的网络访问，比较简单的方式是使用TAP interfaces，TAP直接将二层以太帧发送给用户态程序，这正是虚拟网卡(vNIC)期望的工作方式。虚拟机的IP，可通过主机dnsmasq提供的DHCP服务自动获取，然后将虚拟机网络流量通过主机iptables SNAT转发到外网，实现虚拟机访问网络。虚拟机网络连接拓扑：</p>
+<p><img src="/images/kvm-run-macos/macos-network.jpg" alt="network"></p>
+<h3 id="网桥virbr0创建"><a href="#网桥virbr0创建" class="headerlink" title="网桥virbr0创建"></a>网桥virbr0创建</h3><p>创建持久网桥，这样主机重启后就不必重新配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/sysconfig/network-scripts/ifcfg-virbr0</span><br><span class="line">DEVICE=virbr0</span><br><span class="line">TYPE=Bridge</span><br><span class="line">BOOTPROTO=static</span><br><span class="line">IPADDR=172.16.1.1</span><br><span class="line">NETMASK=255.255.255.0</span><br><span class="line">ONBOOT=yes</span><br></pre></td></tr></table></figure>
+
+<h3 id="iptables-SNAT"><a href="#iptables-SNAT" class="headerlink" title="iptables SNAT"></a>iptables SNAT</h3><p>配置<code>/etc/sysconfig/iptables</code>添加NAT规则:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-A POSTROUTING -s 172.16.1.0/24 ! -d 172.16.1.0/24 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<p>配置<code>/etc/sysctl.conf</code>开启IPv4转发功能：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">net.ipv4.ip_forward = 1</span><br></pre></td></tr></table></figure>
+
+<h3 id="dnsmasq"><a href="#dnsmasq" class="headerlink" title="dnsmasq"></a>dnsmasq</h3><p>配置dnsmasq，给虚拟机提供DHCP和DNS服务。</p>
+<h3 id="虚拟机网卡配置"><a href="#虚拟机网卡配置" class="headerlink" title="虚拟机网卡配置"></a>虚拟机网卡配置</h3><p>将之前虚拟机启动脚本中的网卡配置，改成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-netdev tap,id=net100,ifname=tap100,script=/etc/qemu-ifup.sh,downscript=no -device e1000-82545em,netdev=net100,id=net100,mac=00:16:3e:eb:ca:65</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-netdev tap,id=net101,ifname=tap101,script=/etc/qemu-ifup.sh,downscript=no -device e1000-82545em,netdev=net101,id=net101,mac=00:16:3e:eb:ca:66</span><br></pre></td></tr></table></figure>
+
+<p>注意虚拟网卡是e1000-82545em，不是e1000，否则虚拟机网卡无法正常工作。参见<a target="_blank" rel="noopener" href="https://wiki.qemu.org/ChangeLog/2.1">QEMU 2.1 Changelog</a>：</p>
+<blockquote>
+<p>More variants of the e1000 NIC are supported (e1000-82540em, e1000-82544gc, e1000-82545em). The default e1000 fails with versions of Mac OS X starting at 10.9, while the new e1000-82545em works with all versions of Mac OS X starting at 10.6.</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/qemu-ifup.sh</span><br><span class="line">#!/bin/sh</span><br><span class="line"></span><br><span class="line">switch=virbr0</span><br><span class="line"></span><br><span class="line">echo &quot;$0: adding tap interface \&quot;$1\&quot; to bridge \&quot;$switch\&quot;&quot;</span><br><span class="line">ifconfig $1 0.0.0.0 up</span><br><span class="line">brctl addif $&#123;switch&#125; $1</span><br><span class="line"></span><br><span class="line">exit 0</span><br></pre></td></tr></table></figure>
+
+<p>启动虚拟机后，虚拟机就可正常访问网络了。</p>
+<p>在使用过程中，发现一个问题，TAP的MAC地址是内核随机分配的，而网桥的MAC地址又是绑定到网桥上所有设备的MAC地址的最小值，这样如果有多台虚拟机同时运行，动态创建关闭虚拟机，会造成网桥MAC地址改变，进而会造成正在运行的虚拟机产生网络丢包，影响网络性能。下面用实验进行详细说明。</p>
+<ul>
+<li>创建虚拟机前virbr0 MAC地址：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">$ ifconfig virbr0</span><br><span class="line">virbr0    Link encap:Ethernet  HWaddr 00:00:00:00:00:00</span><br><span class="line">          inet addr:172.16.1.1  Bcast:172.16.1.255  Mask:255.255.255.0</span><br><span class="line">          inet6 addr: fe80::e0a8:9cff:fe32:c4fe/64 Scope:Link</span><br><span class="line">          UP BROADCAST MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:956628 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:566603 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:474140424 (452.1 MiB)  TX bytes:1787345607 (1.6 GiB)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>创建第一台虚拟机，virbr0和tap101 MAC地址：</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ ifconfig virbr0</span><br><span class="line">virbr0    Link encap:Ethernet  HWaddr 62:93:B7:8A:03:B7</span><br><span class="line">          inet addr:172.16.1.1  Bcast:172.16.1.255  Mask:255.255.255.0</span><br><span class="line">          inet6 addr: fe80::e0a8:9cff:fe32:c4fe/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:956628 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:566605 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:474140424 (452.1 MiB)  TX bytes:1787345827 (1.6 GiB)</span><br><span class="line"></span><br><span class="line">$ ifconfig tap101</span><br><span class="line">tap101    Link encap:Ethernet  HWaddr 62:93:B7:8A:03:B7</span><br><span class="line">          inet6 addr: fe80::6093:b7ff:fe8a:3b7/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:1 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:0 (0.0 b)  TX bytes:90 (90.0 b)</span><br></pre></td></tr></table></figure>
+
+<p>虚拟机网卡：</p>
+<p><img src="/images/kvm-run-macos/macos101-en0.png" alt="macos101-en0"></p>
+<ul>
+<li>在第一台虚拟机中，进行ping网络测试，同时启动第二台虚拟机。如果第二台虚拟机的TAP MAC地址小于第一台虚拟机TAP MAC地址，网桥virbr0 MAC地址会发生改变，第一台虚拟机中ping网络测试会产生丢包。</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">tap101    Link encap:Ethernet  HWaddr 62:93:B7:8A:03:B7</span><br><span class="line">          inet6 addr: fe80::6093:b7ff:fe8a:3b7/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:14676 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:22129 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:1138569 (1.0 MiB)  TX bytes:30607004 (29.1 MiB)</span><br><span class="line"></span><br><span class="line">tap102    Link encap:Ethernet  HWaddr 2E:FA:07:80:C6:23</span><br><span class="line">          inet6 addr: fe80::2cfa:7ff:fe80:c623/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:0 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:1 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:0 (0.0 b)  TX bytes:90 (90.0 b)</span><br><span class="line"></span><br><span class="line">virbr0    Link encap:Ethernet  HWaddr 2E:FA:07:80:C6:23</span><br><span class="line">          inet addr:172.16.1.1  Bcast:172.16.1.255  Mask:255.255.255.0</span><br><span class="line">          inet6 addr: fe80::e0a8:9cff:fe32:c4fe/64 Scope:Link</span><br><span class="line">          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1</span><br><span class="line">          RX packets:977654 errors:0 dropped:0 overruns:0 frame:0</span><br><span class="line">          TX packets:581415 errors:0 dropped:0 overruns:0 carrier:0</span><br><span class="line">          collisions:0 txqueuelen:1000</span><br><span class="line">          RX bytes:475446338 (453.4 MiB)  TX bytes:1830140398 (1.7 GiB)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/kvm-run-macos/macos101-ping.png" alt="macos101-ping"></p>
+<p>虚拟机需要重新通过ARP探测网桥MAC地址，才能重新恢复正常网络访问。关闭第二台虚拟机，virbr0 MAC地址又会发生改变，再次造成第一台虚拟机网络丢包。</p>
+<p>虚拟机内tcpdump抓包，注意看，MAC地址从<code>62:93:B7:8A:03:B7</code>变成<code>2E:FA:07:80:C6:23</code>。</p>
+<p><img src="/images/kvm-run-macos/macos101-tcpdump.png" alt="macos101-tcpdump"></p>
+<p>一种解决方案是，将所有虚拟机的TAP MAC地址配置成同一个值，这样网桥MAC地址不会发生改变，也不影响虚拟机网络访问。修改/etc/qemu-ifup.sh:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ cat /etc/qemu-ifup.sh</span><br><span class="line">#!/bin/sh</span><br><span class="line"></span><br><span class="line">switch=virbr0</span><br><span class="line"></span><br><span class="line">echo &quot;$0: adding tap interface \&quot;$1\&quot; to bridge \&quot;$switch\&quot;&quot;</span><br><span class="line">ifconfig $1 hw ether fe:ff:ff:ff:ff:ff</span><br><span class="line">ifconfig $1 0.0.0.0 up</span><br><span class="line">brctl addif $&#123;switch&#125; $1</span><br><span class="line"></span><br><span class="line">exit 0</span><br></pre></td></tr></table></figure>
+
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://qemu.weilnetz.de/doc/qemu-doc.html">QEMU User Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.linux-kvm.org/page/Networking">QEMU Configuring Guest Networking</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.redhat.com/archives/libvirt-users/2015-April/msg00149.html">How does the libvirt deal with the vnet mac address</a></li>
+<li><a target="_blank" rel="noopener" href="http://backreference.org/2010/07/28/linux-bridge-mac-addresses-and-dynamic-ports/">Linux bridge: MAC addresses and dynamic ports</a></li>
+<li><a target="_blank" rel="noopener" href="http://www.innervoice.in/blogs/2013/12/08/tap-interfaces-linux-bridge/">Tap Interfaces and Linux Bridge</a></li>
+<li><a target="_blank" rel="noopener" href="https://goyalankit.com/blog/linux-bridge">Linux Bridge - how it works</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/TUN/TAP">Wikipedia TUN/TAP</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/Documentation/networking/tuntap.txt">Linux kernel TUN/TAP device driver</a></li>
+<li><a target="_blank" rel="noopener" href="http://xmodulo.com/how-to-configure-linux-bridge-interface.html">How to configure a Linux bridge interface</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2017/12/23/kvm-run-macos/" title="KVM运行macOS">https://consen.github.io/2017/12/23/kvm-run-macos/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/KVM/" rel="tag"><i class="fa fa-tag"></i> KVM</a>
+              <a href="/tags/macOS/" rel="tag"><i class="fa fa-tag"></i> macOS</a>
+              <a href="/tags/TAP/" rel="tag"><i class="fa fa-tag"></i> TAP</a>
+              <a href="/tags/bridge/" rel="tag"><i class="fa fa-tag"></i> bridge</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2018/01/04/systemtap/" rel="prev" title="SystemTap">
+                  <i class="fa fa-chevron-left"></i> SystemTap
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/12/13/concurrent-servers/" rel="next" title="并发服务实现">
+                  并发服务实现 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

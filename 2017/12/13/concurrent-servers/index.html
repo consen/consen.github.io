@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="最近拜读了Eli Bendersky写的Concurrent Servers系列博客，作者由简单到复杂，由串行到并行，由多线程到事件驱动，再到第三方库对并发的实现，梳理了并发服务相关思想，在此对相关重点做一总结。 作者写就此文的目的是检验几种流行的并发模型，评判这些模型的伸缩性(scalability)和是否容易实现。作者自定义了一种简单的协议(protocol)，用于服务端与客户端交互，协议是有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="并发服务实现">
+<meta property="og:url" content="https://consen.github.io/2017/12/13/concurrent-servers/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="最近拜读了Eli Bendersky写的Concurrent Servers系列博客，作者由简单到复杂，由串行到并行，由多线程到事件驱动，再到第三方库对并发的实现，梳理了并发服务相关思想，在此对相关重点做一总结。 作者写就此文的目的是检验几种流行的并发模型，评判这些模型的伸缩性(scalability)和是否容易实现。作者自定义了一种简单的协议(protocol)，用于服务端与客户端交互，协议是有">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://consen.github.io/images/concurrent-servers/sequential-flow.png">
+<meta property="og:image" content="https://consen.github.io/images/concurrent-servers/concurrent-flow.png">
+<meta property="og:image" content="https://consen.github.io/images/concurrent-servers/multiplexed-flow.png">
+<meta property="og:image" content="https://consen.github.io/images/concurrent-servers/libuv-architecture.png">
+<meta property="og:image" content="https://consen.github.io/images/concurrent-servers/libuv-loop_iteration.png">
+<meta property="article:published_time" content="2017-12-13T15:46:11.000Z">
+<meta property="article:modified_time" content="2021-10-06T09:50:11.822Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="Concurrency">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://consen.github.io/images/concurrent-servers/sequential-flow.png">
+
+
+<link rel="canonical" href="https://consen.github.io/2017/12/13/concurrent-servers/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2017/12/13/concurrent-servers/","path":"2017/12/13/concurrent-servers/","title":"并发服务实现"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>并发服务实现 | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-sequential-server"><span class="nav-text">A sequential server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Threads"><span class="nav-text">Threads</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Thread-pools"><span class="nav-text">Thread pools</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Event-driven"><span class="nav-text">Event driven</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Blocking-vs-nonblocking-I-O"><span class="nav-text">Blocking vs. nonblocking I&#x2F;O</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select"><span class="nav-text">select</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll"><span class="nav-text">epoll</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#libuv"><span class="nav-text">libuv</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis"><span class="nav-text">Redis</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2017/12/13/concurrent-servers/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          并发服务实现
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-12-13 23:46:11" itemprop="dateCreated datePublished" datetime="2017-12-13T23:46:11+08:00">2017-12-13</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>最近拜读了Eli Bendersky写的<a target="_blank" rel="noopener" href="https://eli.thegreenplace.net/2017/concurrent-servers-part-1-introduction/">Concurrent Servers</a>系列博客，作者由简单到复杂，由串行到并行，由多线程到事件驱动，再到第三方库对并发的实现，梳理了并发服务相关思想，在此对相关重点做一总结。</p>
+<p>作者写就此文的目的是检验几种流行的并发模型，评判这些模型的伸缩性(scalability)和是否容易实现。作者自定义了一种简单的协议(protocol)，用于服务端与客户端交互，协议是有状态的(stateful)，服务端根据客户端发送的数据更改状态，并根据状态产生不同行为。</p>
+<span id="more"></span>
+
+<h2 id="A-sequential-server"><a href="#A-sequential-server" class="headerlink" title="A sequential server"></a>A sequential server</h2><p>串行服务，一次只能处理一个客户端请求，其他客户端只能等待，所以效率很低，这也促使引入更高效的并发模型。(我之前的一篇博客<a href="https://consen.github.io/2016/09/20/a-network-timeout-bug/">网络连接为什么超时了</a>就跟串行服务有关)</p>
+<p><img src="/images/concurrent-servers/sequential-flow.png"></p>
+<h2 id="Threads"><a href="#Threads" class="headerlink" title="Threads"></a>Threads</h2><p>并发实现的一种方法是多线程，这样服务端可同时处理多个客户端。</p>
+<p><img src="/images/concurrent-servers/concurrent-flow.png"></p>
+<p>每一个客户端都新建一个线程，带来的问题是，客户端一多，线程会占用服务器大量内存，而且大量CPU时间用于线程上下文切换，甚至会引发安全问题，资源耗尽造成拒绝服务(DoS)攻击。所以需要对并发的客户端数量进行限制(rate-limiting)，比较流行的设计是线程池(thread pool)。</p>
+<h3 id="Thread-pools"><a href="#Thread-pools" class="headerlink" title="Thread pools"></a>Thread pools</h3><p>线程池思想简单，却功能强大。服务端创建一个有多个线程的线程池，只有线程池中有空闲线程时，才会处理新的客户端请求。在面对高负载时，线程池也是一种优雅降级(graceful degradation)，服务端仍然能以一定速率提供正常服务，而不会资源耗尽停止服务。</p>
+<h2 id="Event-driven"><a href="#Event-driven" class="headerlink" title="Event driven"></a>Event driven</h2><p>多线程并不是并发处理的唯一方式，另外一种常见的并发方法是事件驱动编程(event-driven programming)，即异步编程(asynchronous programming)。</p>
+<h3 id="Blocking-vs-nonblocking-I-O"><a href="#Blocking-vs-nonblocking-I-O" class="headerlink" title="Blocking vs. nonblocking I/O"></a>Blocking vs. nonblocking I/O</h3><p>首先对比下阻塞I/O和非阻塞I/O，阻塞I/O是我们比较熟悉的I/O API工作方式，比如从一个socket接收数据，对recv的调用会阻塞，直到接收到数据。当把socket设置为非阻塞模式，对recv的调用会立即返回，即使没有接收到数据。</p>
+<p>似乎我们可以通过非阻塞I/O来实现并发，同时处理多个客户端，只要轮询(polling)每个socket，检查是否收到了数据。但是在实际应用中，这种解决方案伸缩性较差，比如现在有1000个客户端需要并发处理，单单是遍历所有sockets就要花费很多时间，相当低效。其实操作系统内部是知道哪个socket收到了数据，我们不必扫描所有sockets，直接使用提供的API即可。</p>
+<h3 id="select"><a href="#select" class="headerlink" title="select"></a>select</h3><p>select允许在单线程中监控多个文件描述符，无需不必要的轮询。通过select，实现了I/O复用(I/O multiplexing)，在同一个线程中并发处理多个客户端，一个客户端处理完一些工作后，就切换到另一个客户端接着处理。</p>
+<p><img src="/images/concurrent-servers/multiplexed-flow.png"></p>
+<p>然而select有一定的限制，一是可监控的文件描述符数量受限，一般最多为1024，二是性能较差，当select返回时，提供的信息只有可用文件描述的数量，具体是哪些文件描述符可用，还是需要遍历所有监控的文件描述符。因此现代并发服务实现已经很少用select了，转而使用更高效的其他API，如epoll。</p>
+<h3 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h3><p>epoll的高效之处在于直接返回所有可用的文件描述符，不必再去遍历所有文件描述符，这样就将找到可用文件描述符的时间复杂度从O(N)降到了O(1)。</p>
+<h2 id="libuv"><a href="#libuv" class="headerlink" title="libuv"></a>libuv</h2><p>直接基于select或epoll实现并发服务，跨平台能力较差，<a target="_blank" rel="noopener" href="http://libuv.org/">libuv</a>做了一层抽象，提供高性能异步IO编程模型。</p>
+<p><img src="/images/concurrent-servers/libuv-architecture.png"></p>
+<p>libuv的核心是事件循环(evevt loop)，用户只需要注册事件处理例程(event handlers)，即回掉函数(callback functions)，然后运行循环(loop)。</p>
+<p><img src="/images/concurrent-servers/libuv-loop_iteration.png"></p>
+<p>基于libuv实现的事件驱动(event-driven)服务，在单线程中并发处理所有客户端，服务逻辑通过一系列的回掉函数实现，如果回掉函数的操作需要花费大量时间，会阻塞整个事件循环(event loop)，所以长时间运行的回掉函数是一大禁忌。</p>
+<p>但是有些回掉操作确实需要花费大量时间，就需要将阻塞调用(blocking calls)转换成异步调用(asynchronous calls)，即利用线程池，libuv提供了相应的机制。</p>
+<h2 id="Redis"><a href="#Redis" class="headerlink" title="Redis"></a>Redis</h2><p>最后作者以Redis为例，分析了其并发实现。Redis实现了自己的事件驱动库(event-driven library)，叫<a target="_blank" rel="noopener" href="https://redis.io/topics/internals-rediseventlib">ae</a>，既然有现成的libuv，为什么还要自己实现ae呢？Redis作者回答说，ae只有区区1K行左右的代码，专门为Redis设计，和Redis协同发展，只包含Redis需要的功能，而libuv有26K的代码，庞大又复杂，包含了很多Redis不需要的功能。这也为软件项目中的依赖处理提供了借鉴。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2017/12/13/concurrent-servers/" title="并发服务实现">https://consen.github.io/2017/12/13/concurrent-servers/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Concurrency/" rel="tag"><i class="fa fa-tag"></i> Concurrency</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/23/kvm-run-macos/" rel="prev" title="KVM运行macOS">
+                  <i class="fa fa-chevron-left"></i> KVM运行macOS
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/11/28/qemu-nbd-segfault/" rel="next" title="segfault段错误问题修复">
+                  segfault段错误问题修复 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

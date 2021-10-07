@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="在使用Xen的过程中，会遇到各种问题，掌握一些常见的调试技巧，对于解决问题能起到事半功倍的效果。网上一些Xen调试相关的资源：  Debugging Xen Xen Serial Console Xen Debugging  Xen hypervisor的运行信息写到了内存中，可以通过xl dmesg命令显示，并没有写入到日志文件，所以不太方便查看。如果遇到更严重的情况，Xen在启动阶段就出错了，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用串口调试Xen">
+<meta property="og:url" content="https://consen.github.io/2017/07/26/debug-xen-with-serial-console/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="在使用Xen的过程中，会遇到各种问题，掌握一些常见的调试技巧，对于解决问题能起到事半功倍的效果。网上一些Xen调试相关的资源：  Debugging Xen Xen Serial Console Xen Debugging  Xen hypervisor的运行信息写到了内存中，可以通过xl dmesg命令显示，并没有写入到日志文件，所以不太方便查看。如果遇到更严重的情况，Xen在启动阶段就出错了，">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://consen.github.io/images/debug-xen-with-serial-console/crossover.png">
+<meta property="og:image" content="https://consen.github.io/images/debug-xen-with-serial-console/seriale_cable.jpg">
+<meta property="og:image" content="https://consen.github.io/images/debug-xen-with-serial-console/minicom.png">
+<meta property="article:published_time" content="2017-07-26T11:56:45.000Z">
+<meta property="article:modified_time" content="2021-10-06T09:50:11.822Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="Xen">
+<meta property="article:tag" content="Serial Console">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://consen.github.io/images/debug-xen-with-serial-console/crossover.png">
+
+
+<link rel="canonical" href="https://consen.github.io/2017/07/26/debug-xen-with-serial-console/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2017/07/26/debug-xen-with-serial-console/","path":"2017/07/26/debug-xen-with-serial-console/","title":"使用串口调试Xen"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>使用串口调试Xen | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B2%E5%8F%A3%E7%BA%BF%E9%80%89%E6%8B%A9"><span class="nav-text">串口线选择</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B2%E5%8F%A3%E8%BF%9E%E9%80%9A%E6%80%A7%E6%B5%8B%E8%AF%95"><span class="nav-text">串口连通性测试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Xen%E4%B8%B2%E5%8F%A3%E9%85%8D%E7%BD%AE"><span class="nav-text">Xen串口配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%B2%E5%8F%A3%E8%B0%83%E8%AF%95Xen"><span class="nav-text">串口调试Xen</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2017/07/26/debug-xen-with-serial-console/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用串口调试Xen
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-07-26 19:56:45" itemprop="dateCreated datePublished" datetime="2017-07-26T19:56:45+08:00">2017-07-26</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Virtualization/" itemprop="url" rel="index"><span itemprop="name">Virtualization</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>在使用Xen的过程中，会遇到各种问题，掌握一些常见的调试技巧，对于解决问题能起到事半功倍的效果。网上一些Xen调试相关的资源：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="https://wiki.xenproject.org/wiki/Debugging_Xen">Debugging Xen</a></li>
+<li><a target="_blank" rel="noopener" href="https://wiki.xenproject.org/wiki/Xen_Serial_Console">Xen Serial Console</a></li>
+<li><a target="_blank" rel="noopener" href="http://www-archive.xenproject.org/files/xensummit_intel09/xen-debugging.pdf">Xen Debugging</a></li>
+</ol>
+<p>Xen hypervisor的运行信息写到了内存中，可以通过<code>xl dmesg</code>命令显示，并没有写入到日志文件，所以不太方便查看。如果遇到更严重的情况，Xen在启动阶段就出错了，则无法进入Dom0运行<code>xl dmesg</code>命令查看启动信息，只能通过串口查看。</p>
+<p>使用串口调试Xen，需要两台物理机，通过串口线连接，一台运行Xen，另一台通过串口查看输出信息。</p>
+<span id="more"></span>
+
+<h2 id="串口线选择"><a href="#串口线选择" class="headerlink" title="串口线选择"></a>串口线选择</h2><p>串口线注意选择交叉线而不是直连线，一端用于发送，一端用于接收。</p>
+<p><img src="/images/debug-xen-with-serial-console/crossover.png" alt="crossover"></p>
+<p>接口也要选对，看是公对公，母对母，还是公对母。</p>
+<p><img src="/images/debug-xen-with-serial-console/seriale_cable.jpg" alt="serial_cable"></p>
+<h2 id="串口连通性测试"><a href="#串口连通性测试" class="headerlink" title="串口连通性测试"></a>串口连通性测试</h2><p>在对Xen进行串口配置之前，可以先测试下串口连通性。</p>
+<p>查看串口信息，这里有两个串口（COM1和COM2），Linux下叫做ttyS0和ttyS1。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ dmesg  | grep tty</span><br><span class="line">console [tty0] enabled</span><br><span class="line">00:03: ttyS1 at I/O 0x2f8 (irq = 3, base_baud = 115200) is a 16550A</span><br><span class="line">serial8250: ttyS0 at I/O 0x3f8 (irq = 4, base_baud = 115200) is a 16550A</span><br></pre></td></tr></table></figure>
+
+<p>在两台设备上同时运行<code>minicom -s</code>，配置串口。</p>
+<p><img src="/images/debug-xen-with-serial-console/minicom.png" alt="minicom"></p>
+<p>配好后，输入任意字符，如果在另一台设备的<code>minicom</code>中能看到对应的输出，说明串口连接正常。</p>
+<h2 id="Xen串口配置"><a href="#Xen串口配置" class="headerlink" title="Xen串口配置"></a>Xen串口配置</h2><p>在运行Xen的设备上，配置Grub开机启动项，Xen参数添加<code>loglvl=all guest_loglvl=all console=com2 com2=115200,8n1</code>，Dom0内核参数添加<code>console=hvc0</code>。</p>
+<p>如果不想在串口中错过每一条信息，可在Xen参数添加<code>sync_console</code>，强制同步串口输出，当然这只适用于调试，因为需要将所有信息从串口输出，严重影响hypervisor性能，虚拟机会特别卡。</p>
+<h2 id="串口调试Xen"><a href="#串口调试Xen" class="headerlink" title="串口调试Xen"></a>串口调试Xen</h2><p>Xen设备配置好后，在另一台设备上运行<code>minicom -s -C xen.log</code>，（<code>-C xen.log</code>将串口输出同时保存在xen.log文件，方便后续查看）,重启Xen设备。</p>
+<p>Xen设备启动成功后，在串口上看到是Dom0，按6次<code>Ctrl-a</code>进入Xen。就可以看到虚拟机运行过程中，hypervisor的输出信息，可以更改Xen源码，添加更多printk()日志输出。也可以通过Xen debug keys获取相应信息，输入<code>h</code>，输出可用的kyes，输入key，输出对应信息。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">(XEN) &#x27;h&#x27; pressed -&gt; showing installed handlers</span><br><span class="line">(XEN)  key &#x27;%&#x27; (ascii &#x27;25&#x27;) =&gt; trap to xendbg</span><br><span class="line">(XEN)  key &#x27;*&#x27; (ascii &#x27;2a&#x27;) =&gt; print all diagnostics</span><br><span class="line">(XEN)  key &#x27;0&#x27; (ascii &#x27;30&#x27;) =&gt; dump Dom0 registers</span><br><span class="line">(XEN)  key &#x27;A&#x27; (ascii &#x27;41&#x27;) =&gt; toggle alternative key handling</span><br><span class="line">(XEN)  key &#x27;D&#x27; (ascii &#x27;44&#x27;) =&gt; dump VT-x EPT tables</span><br><span class="line">(XEN)  key &#x27;H&#x27; (ascii &#x27;48&#x27;) =&gt; dump heap info</span><br><span class="line">(XEN)  key &#x27;I&#x27; (ascii &#x27;49&#x27;) =&gt; dump HVM irq info</span><br><span class="line">(XEN)  key &#x27;M&#x27; (ascii &#x27;4d&#x27;) =&gt; dump MSI state</span><br><span class="line">(XEN)  key &#x27;N&#x27; (ascii &#x27;4e&#x27;) =&gt; trigger an NMI</span><br><span class="line">(XEN)  key &#x27;Q&#x27; (ascii &#x27;51&#x27;) =&gt; dump PCI devices</span><br><span class="line">(XEN)  key &#x27;R&#x27; (ascii &#x27;52&#x27;) =&gt; reboot machine</span><br><span class="line">(XEN)  key &#x27;V&#x27; (ascii &#x27;56&#x27;) =&gt; dump iommu info</span><br><span class="line">(XEN)  key &#x27;a&#x27; (ascii &#x27;61&#x27;) =&gt; dump timer queues</span><br><span class="line">(XEN)  key &#x27;c&#x27; (ascii &#x27;63&#x27;) =&gt; dump ACPI Cx structures</span><br><span class="line">(XEN)  key &#x27;d&#x27; (ascii &#x27;64&#x27;) =&gt; dump registers</span><br><span class="line">(XEN)  key &#x27;e&#x27; (ascii &#x27;65&#x27;) =&gt; dump evtchn info</span><br><span class="line">(XEN)  key &#x27;g&#x27; (ascii &#x27;67&#x27;) =&gt; print grant table usage</span><br><span class="line">(XEN)  key &#x27;h&#x27; (ascii &#x27;68&#x27;) =&gt; show this message</span><br><span class="line">(XEN)  key &#x27;i&#x27; (ascii &#x27;69&#x27;) =&gt; dump interrupt bindings</span><br><span class="line">(XEN)  key &#x27;m&#x27; (ascii &#x27;6d&#x27;) =&gt; memory info</span><br><span class="line">(XEN)  key &#x27;n&#x27; (ascii &#x27;6e&#x27;) =&gt; NMI statistics</span><br><span class="line">(XEN)  key &#x27;o&#x27; (ascii &#x27;6f&#x27;) =&gt; dump iommu p2m table</span><br><span class="line">(XEN)  key &#x27;q&#x27; (ascii &#x27;71&#x27;) =&gt; dump domain (and guest debug) info</span><br><span class="line">(XEN)  key &#x27;r&#x27; (ascii &#x27;72&#x27;) =&gt; dump run queues</span><br><span class="line">(XEN)  key &#x27;s&#x27; (ascii &#x27;73&#x27;) =&gt; dump softtsc stats</span><br><span class="line">(XEN)  key &#x27;t&#x27; (ascii &#x27;74&#x27;) =&gt; display multi-cpu clock info</span><br><span class="line">(XEN)  key &#x27;u&#x27; (ascii &#x27;75&#x27;) =&gt; dump NUMA info</span><br><span class="line">(XEN)  key &#x27;v&#x27; (ascii &#x27;76&#x27;) =&gt; dump VT-x VMCSs</span><br><span class="line">(XEN)  key &#x27;w&#x27; (ascii &#x27;77&#x27;) =&gt; synchronously dump console ring buffer (dmesg)</span><br><span class="line">(XEN)  key &#x27;z&#x27; (ascii &#x27;7a&#x27;) =&gt; dump IOAPIC info</span><br></pre></td></tr></table></figure>
+
+<p>参考：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://en.opensuse.org/How_to_Capture_Xen_Hypervisor_and_Kernel_Messages_using_a_Serial_Cable">How to Capture Xen Hypervisor and Kernel Messages using a Serial Cable</a></li>
+<li><a target="_blank" rel="noopener" href="https://xenbits.xen.org/docs/unstable/misc/xen-command-line.html">Xen Hypervisor Command Line Options</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.decisivetactics.com/support/view?article=crossover-or-null-modem-vs-straight-through-serial-cable">Crossover or “Null Modem” vs. Straight Through Serial Cable</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/8-N-1">8-N-1</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.kernel.org/doc/html/latest/admin-guide/serial-console.html">Linux Serial Console</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2017/07/26/debug-xen-with-serial-console/" title="使用串口调试Xen">https://consen.github.io/2017/07/26/debug-xen-with-serial-console/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Xen/" rel="tag"><i class="fa fa-tag"></i> Xen</a>
+              <a href="/tags/Serial-Console/" rel="tag"><i class="fa fa-tag"></i> Serial Console</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/11/28/qemu-nbd-segfault/" rel="prev" title="segfault段错误问题修复">
+                  <i class="fa fa-chevron-left"></i> segfault段错误问题修复
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/02/14/four-linux-development-tools/" rel="next" title="Linux开发四件利器--Vim Tmux Git Zsh">
+                  Linux开发四件利器--Vim Tmux Git Zsh <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>

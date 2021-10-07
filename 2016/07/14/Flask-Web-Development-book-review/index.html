@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
+<meta name="generator" content="Hexo 5.4.0">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<meta name="description" content="这本书是偶然在一篇博客《如果有人让你推荐Python技术书，请让他看这个列表》中看到的，《Flask Web Development》被列在进阶级，豆瓣评分8.6，算是比较高，比较受公众认可的了。正好最近工作中要用到Web开发相关知识，花了两天时间看了下这本书，果然没让人失望。 这是一本写作技巧和Web技术并重的书，从第一页开始就让你爱不释手，想一口气读完，酣畅淋漓。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《Flask Web Development》Book Review">
+<meta property="og:url" content="https://consen.github.io/2016/07/14/Flask-Web-Development-book-review/index.html">
+<meta property="og:site_name" content="Consen">
+<meta property="og:description" content="这本书是偶然在一篇博客《如果有人让你推荐Python技术书，请让他看这个列表》中看到的，《Flask Web Development》被列在进阶级，豆瓣评分8.6，算是比较高，比较受公众认可的了。正好最近工作中要用到Web开发相关知识，花了两天时间看了下这本书，果然没让人失望。 这是一本写作技巧和Web技术并重的书，从第一页开始就让你爱不释手，想一口气读完，酣畅淋漓。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2016-07-14T02:23:30.000Z">
+<meta property="article:modified_time" content="2021-10-06T03:20:53.828Z">
+<meta property="article:author" content="Consen">
+<meta property="article:tag" content="Book">
+<meta property="article:tag" content="Flask">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://consen.github.io/2016/07/14/Flask-Web-Development-book-review/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"https://consen.github.io/2016/07/14/Flask-Web-Development-book-review/","path":"2016/07/14/Flask-Web-Development-book-review/","title":"《Flask Web Development》Book Review"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>《Flask Web Development》Book Review | Consen</title>
+  
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">Consen</h1>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
+        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Consen"
+      src="/images/avatar.png">
+  <p class="site-author-name" itemprop="name">Consen</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">27</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">40</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/consen" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;consen" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:imxikangjie@gmail.com" title="E-Mail → mailto:imxikangjie@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://consen.github.io/2016/07/14/Flask-Web-Development-book-review/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.png">
+      <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Consen">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《Flask Web Development》Book Review
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2016-07-14 10:23:30" itemprop="dateCreated datePublished" datetime="2016-07-14T10:23:30+08:00">2016-07-14</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">In</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>这本书是偶然在一篇博客<a target="_blank" rel="noopener" href="http://python.jobbole.com/85620/">《如果有人让你推荐Python技术书，请让他看这个列表》</a>中看到的，《Flask Web Development》被列在进阶级，豆瓣评分8.6，算是比较高，比较受公众认可的了。正好最近工作中要用到Web开发相关知识，花了两天时间看了下这本书，果然没让人失望。</p>
+<p>这是一本写作技巧和Web技术并重的书，从第一页开始就让你爱不释手，想一口气读完，酣畅淋漓。</p>
+<span id="more"></span>
+
+<p>作者循循善诱，先抛出一个问题，然后给出一种解决方案，有时候这种解决方案是最佳的，有时候并不完美，有副作用，这也是作者刻意安排的，因为作者又要抛出另外一个问题，引出另外一个有意思的话题。时不时一语道破天机，让你自然而然地接受知识。读书的过程中你就会感受到，隐隐有一根主线，把所有零碎的知识都串联起来。把复杂抽象的知识通过简单具体的方式呈现，娓娓道来。</p>
+<p>作者对书中内容字斟句酌，精心布局，如果没有长年累月的积累，没有深入的实践与思考，是达不到这样的高度的。</p>
+<p>也许《Flask Web Development》这本书中讲的Flask Web开发，你以后不一定会用到，但书中内容的编排，行文的方式，一定对你写文章、写书大有帮助。</p>
+<p>最后，感受下Flask的简洁优美，领悟Flask是怎样建立生态的。下面列出了《Flask Web Development》中使用到的Flask扩展：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ pip list | grep Flask</span><br><span class="line">Flask (0.10.1)</span><br><span class="line">Flask-Bootstrap (3.3.6.0)</span><br><span class="line">Flask-HTTPAuth (3.1.2)</span><br><span class="line">Flask-Login (0.3.2)</span><br><span class="line">Flask-Mail (0.9.1)</span><br><span class="line">Flask-Migrate (1.8.1)</span><br><span class="line">Flask-Moment (0.5.1)</span><br><span class="line">Flask-PageDown (0.2.1)</span><br><span class="line">Flask-Script (2.0.5)</span><br><span class="line">Flask-SQLAlchemy (2.1)</span><br><span class="line">Flask-WTF (0.12)</span><br></pre></td></tr></table></figure>
+
+<p>再看看各个模块是怎么组织起来的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> flask <span class="keyword">import</span> Flask</span><br><span class="line"><span class="keyword">from</span> flask.ext.bootstrap <span class="keyword">import</span> Bootstrap</span><br><span class="line"><span class="keyword">from</span> flask.ext.mail <span class="keyword">import</span> Mail</span><br><span class="line"><span class="keyword">from</span> flask.ext.moment <span class="keyword">import</span> Moment</span><br><span class="line"><span class="keyword">from</span> flask.ext.sqlalchemy <span class="keyword">import</span> SQLAlchemy</span><br><span class="line"><span class="keyword">from</span> flask.ext.login <span class="keyword">import</span> LoginManager</span><br><span class="line"><span class="keyword">from</span> flask.ext.pagedown <span class="keyword">import</span> PageDown</span><br><span class="line"><span class="keyword">from</span> config <span class="keyword">import</span> config</span><br><span class="line"></span><br><span class="line">bootstrap = Bootstrap()</span><br><span class="line">mail = Mail()</span><br><span class="line">moment = Moment()</span><br><span class="line">db = SQLAlchemy()</span><br><span class="line">pagedown = PageDown()</span><br><span class="line"></span><br><span class="line">login_manager = LoginManager()</span><br><span class="line">login_manager.session_protection = <span class="string">&#x27;strong&#x27;</span></span><br><span class="line">login_manager.login_view = <span class="string">&#x27;auth.login&#x27;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_app</span>(<span class="params">config_name</span>):</span></span><br><span class="line">    app = Flask(__name__)</span><br><span class="line">    app.config.from_object(config[config_name])</span><br><span class="line">    config[config_name].init_app(app)</span><br><span class="line"></span><br><span class="line">    bootstrap.init_app(app)</span><br><span class="line">    mail.init_app(app)</span><br><span class="line">    moment.init_app(app)</span><br><span class="line">    db.init_app(app)</span><br><span class="line">    login_manager.init_app(app)</span><br><span class="line">    pagedown.init_app(app)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> app.debug <span class="keyword">and</span> <span class="keyword">not</span> app.testing <span class="keyword">and</span> <span class="keyword">not</span> app.config[<span class="string">&#x27;SSL_DISABLE&#x27;</span>]:</span><br><span class="line">        <span class="keyword">from</span> flask.ext.sslify <span class="keyword">import</span> SSLify</span><br><span class="line">        sslify = SSLify(app)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> .main <span class="keyword">import</span> main <span class="keyword">as</span> main_blueprint</span><br><span class="line">    app.register_blueprint(main_blueprint)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> .auth <span class="keyword">import</span> auth <span class="keyword">as</span> auth_blueprint</span><br><span class="line">    app.register_blueprint(auth_blueprint, url_prefix=<span class="string">&#x27;/auth&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">from</span> .api_1_0 <span class="keyword">import</span> api <span class="keyword">as</span> api_1_0_blueprint</span><br><span class="line">    app.register_blueprint(api_1_0_blueprint, url_prefix=<span class="string">&#x27;/api/v1.0&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> app  </span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Consen
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="https://consen.github.io/2016/07/14/Flask-Web-Development-book-review/" title="《Flask Web Development》Book Review">https://consen.github.io/2016/07/14/Flask-Web-Development-book-review/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Book/" rel="tag"><i class="fa fa-tag"></i> Book</a>
+              <a href="/tags/Flask/" rel="tag"><i class="fa fa-tag"></i> Flask</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2016/07/19/switch-browser-from-mathon-to-chrome/" rel="prev" title="Switch Browser From Mathon to Chrome">
+                  <i class="fa fa-chevron-left"></i> Switch Browser From Mathon to Chrome
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2016/06/13/why-hhkb/" rel="next" title="Why HHKB">
+                  Why HHKB <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Consen</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/mist/" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  
+
+
+
+  <script src="/js/third-party/fancybox.js"></script>
+
+
+  
+
+
+
+
+
+</body>
+</html>
