@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
-<meta name="generator" content="Hexo 5.4.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -20,8 +19,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta name="description" content="Xen官方上周发布了Xen 4.8, What’s New with Xen Project Hypervisor 4.8?，添加了很多新功能，如Credit2调度器正式发布。Xenforce目前使用的是Xen 4.5，从性能、稳定性、功能等几方面考虑，决定升级到Xen 4.8。">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="Xen官方上周发布了Xen 4.8, What’s New with Xen Project Hypervisor 4.8?，添加了很多新功能，如Credit2调度器正式发布。Xenforce目前使用的是Xen 4.5，从性能、稳定性、功能等几方面考虑，决定升级到Xen 4.8。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="升级Xen 4.5到Xen 4.8">
 <meta property="og:url" content="https://consen.github.io/2016/12/16/upgrade-xen45-to-xen48/index.html">
@@ -50,6 +50,7 @@
 
 
 
+
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -73,7 +74,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Consen</h1>
+      <p class="site-title">Consen</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -255,7 +256,7 @@
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ ls dist</span><br><span class="line">COPYING  install  install.sh  README</span><br></pre></td></tr></table></figure>
 
 <ul>
-<li>安装，运行dist/install.sh脚本，如果安装在<code>/usr/local</code>目录下，运行<code>ldconfig /usr/local/lib</code>命令加载动态链接库。</li>
+<li>安装，运行dist&#x2F;install.sh脚本，如果安装在<code>/usr/local</code>目录下，运行<code>ldconfig /usr/local/lib</code>命令加载动态链接库。</li>
 <li>配置开机启动项，因为是从Xen 4.5升级过来的，直接沿用之前的<code>grub</code>配置即可，当然，如果想使用<code>Credit2</code>调度器，得在grub配置中添加<code>sched=credit2</code>，详见<a target="_blank" rel="noopener" href="http://xenbits.xen.org/docs/unstable/misc/xen-command-line.html">Xen Hypervisor Command Line Options</a></li>
 <li>重启设备。重启完成后，运行<code>xl info</code>命令，查看Xen版本。</li>
 </ul>
@@ -334,7 +335,7 @@
 
 <div class="copyright">
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

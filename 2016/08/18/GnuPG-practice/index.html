@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
-<meta name="generator" content="Hexo 5.4.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -20,8 +19,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta name="description" content="这两天有一个大新闻，和美国国家安全局（NSA）有密切关系的方程式组织（Equation Group）遭到The Shadow Brokers攻击，大量黑客工具被泄露到网上，如果你感兴趣，一定已经下载下来把玩了一番:)。 将文件解压缩后，会看到文件用了GnuPG工具进行加密，简单了解了下GnuPG怎么用，现在分享出来。">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="这两天有一个大新闻，和美国国家安全局（NSA）有密切关系的方程式组织（Equation Group）遭到The Shadow Brokers攻击，大量黑客工具被泄露到网上，如果你感兴趣，一定已经下载下来把玩了一番:)。 将文件解压缩后，会看到文件用了GnuPG工具进行加密，简单了解了下GnuPG怎么用，现在分享出来。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="GnuPG实战">
 <meta property="og:url" content="https://consen.github.io/2016/08/18/GnuPG-practice/index.html">
@@ -50,6 +50,7 @@
 
 
 
+
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -73,7 +74,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Consen</h1>
+      <p class="site-title">Consen</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -121,7 +122,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86"><span class="nav-text">对称加密&#x2F;解密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%EF%BC%9A"><span class="nav-text">加密：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%EF%BC%9A"><span class="nav-text">解密：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86Equation-Group"><span class="nav-text">解密Equation Group:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86-%E8%A7%A3%E5%AF%86"><span class="nav-text">非对称加密&#x2F;解密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9%EF%BC%9A"><span class="nav-text">生成密钥对：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%EF%BC%9A-1"><span class="nav-text">加密：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%EF%BC%9A-1"><span class="nav-text">解密：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D-%E9%AA%8C%E7%AD%BE"><span class="nav-text">签名&#x2F;验签</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D%EF%BC%9A"><span class="nav-text">签名：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E7%AD%BE%EF%BC%9A"><span class="nav-text">验签：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Equation-Group%E9%AA%8C%E7%AD%BE%EF%BC%9A"><span class="nav-text">Equation Group验签：</span></a></li></ol></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86-x2F-%E8%A7%A3%E5%AF%86"><span class="nav-text">对称加密&#x2F;解密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%EF%BC%9A"><span class="nav-text">加密：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%EF%BC%9A"><span class="nav-text">解密：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86Equation-Group"><span class="nav-text">解密Equation Group:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9D%9E%E5%AF%B9%E7%A7%B0%E5%8A%A0%E5%AF%86-x2F-%E8%A7%A3%E5%AF%86"><span class="nav-text">非对称加密&#x2F;解密</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%AF%86%E9%92%A5%E5%AF%B9%EF%BC%9A"><span class="nav-text">生成密钥对：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E5%AF%86%EF%BC%9A-1"><span class="nav-text">加密：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E5%AF%86%EF%BC%9A-1"><span class="nav-text">解密：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D-x2F-%E9%AA%8C%E7%AD%BE"><span class="nav-text">签名&#x2F;验签</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AD%BE%E5%90%8D%EF%BC%9A"><span class="nav-text">签名：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E7%AD%BE%EF%BC%9A"><span class="nav-text">验签：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Equation-Group%E9%AA%8C%E7%AD%BE%EF%BC%9A"><span class="nav-text">Equation Group验签：</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -249,7 +250,7 @@
 <h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p>CentOS安装GnuPG：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># yum install gnupg2</span><br></pre></td></tr></table></figure>
 
-<h2 id="对称加密-解密"><a href="#对称加密-解密" class="headerlink" title="对称加密/解密"></a>对称加密/解密</h2><p>加密解密使用相同的密钥。</p>
+<h2 id="对称加密-x2F-解密"><a href="#对称加密-x2F-解密" class="headerlink" title="对称加密&#x2F;解密"></a>对称加密&#x2F;解密</h2><p>加密解密使用相同的密钥。</p>
 <h3 id="加密："><a href="#加密：" class="headerlink" title="加密："></a>加密：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg -c --cipher-algo AES256 demo.txt</span><br></pre></td></tr></table></figure>
 <p>按提示输入密码，生成<code>demo.txt.gpg</code>加密文件。</p>
 <h3 id="解密："><a href="#解密：" class="headerlink" title="解密："></a>解密：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg demo.txt.gpg</span><br></pre></td></tr></table></figure>
@@ -266,7 +267,7 @@
 <p>得到Fireware文件夹，所有秘密尽收眼底：</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ tree Firewall/ -L 1 -F</span><br><span class="line">Firewall/</span><br><span class="line">├── BANANAGLEE/</span><br><span class="line">├── BARGLEE/</span><br><span class="line">├── BLATSTING/</span><br><span class="line">├── BUZZDIRECTION/</span><br><span class="line">├── EXPLOITS/</span><br><span class="line">├── OPS/</span><br><span class="line">├── padding</span><br><span class="line">├── SCRIPTS/</span><br><span class="line">├── TOOLS/</span><br><span class="line">└── TURBO/</span><br></pre></td></tr></table></figure>
 
-<h2 id="非对称加密-解密"><a href="#非对称加密-解密" class="headerlink" title="非对称加密/解密"></a>非对称加密/解密</h2><p>公钥加密，私钥解密。</p>
+<h2 id="非对称加密-x2F-解密"><a href="#非对称加密-x2F-解密" class="headerlink" title="非对称加密&#x2F;解密"></a>非对称加密&#x2F;解密</h2><p>公钥加密，私钥解密。</p>
 <h3 id="生成密钥对："><a href="#生成密钥对：" class="headerlink" title="生成密钥对："></a>生成密钥对：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --gen-key</span><br></pre></td></tr></table></figure>
 
 <p>列出公钥:</p>
@@ -286,7 +287,7 @@
 <h3 id="解密：-1"><a href="#解密：-1" class="headerlink" title="解密："></a>解密：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">gpg --output demo.txt --decrypt demo.txt.gpg</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">gpg demo.txt.gpg</span><br></pre></td></tr></table></figure>
 
 <p>生成解密文件demo.txt。</p>
-<h2 id="签名-验签"><a href="#签名-验签" class="headerlink" title="签名/验签"></a>签名/验签</h2><blockquote>
+<h2 id="签名-x2F-验签"><a href="#签名-x2F-验签" class="headerlink" title="签名&#x2F;验签"></a>签名&#x2F;验签</h2><blockquote>
 <p>非对称加密的另一个用途是用于数字签名，签署者使用他的私钥（应用一个签名算法）来签署文档。验证者使用签署者的公钥（公开的）验证文档。当一个文档被签署时，任何人都能验证它，因为任何人都能访问签署者的公钥。由于私钥的保密性，签名是无法伪造的。</p>
 </blockquote>
 <h3 id="签名："><a href="#签名：" class="headerlink" title="签名："></a>签名：</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ gpg --armor -output demo.txt.sig --detach-sign demo.txt</span><br><span class="line"></span><br><span class="line">or</span><br><span class="line"></span><br><span class="line">$ gpg -a -o demo.txt.sig -b demo.txt</span><br></pre></td></tr></table></figure>
@@ -380,7 +381,7 @@
 
 <div class="copyright">
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

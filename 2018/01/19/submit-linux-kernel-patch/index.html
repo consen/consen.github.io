@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
-<meta name="generator" content="Hexo 5.4.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -20,8 +19,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta name="description" content="上一篇博客使用QEMU和GDB调试Linux内核，最后使用内核提供的GDB扩展功能获取当前运行进程，发现内核已经不再使用thread_info获取当前进程，而是使用Per-CPU变量。而且从内核4.9版本开始，thread_info也不再位于内核栈底部，然而内核提供的辅助调试函数lx_thread_info()仍然通过内核栈底地址获取thread_info，很明显这是个Bug，于是决定将其修复并提">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="上一篇博客使用QEMU和GDB调试Linux内核，最后使用内核提供的GDB扩展功能获取当前运行进程，发现内核已经不再使用thread_info获取当前进程，而是使用Per-CPU变量。而且从内核4.9版本开始，thread_info也不再位于内核栈底部，然而内核提供的辅助调试函数lx_thread_info()仍然通过内核栈底地址获取thread_info，很明显这是个Bug，于是决定将其修复并提">
 <meta property="og:type" content="article">
 <meta property="og:title" content="提交Linux内核Patch">
 <meta property="og:url" content="https://consen.github.io/2018/01/19/submit-linux-kernel-patch/index.html">
@@ -52,6 +52,7 @@
 
 
 
+
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -75,7 +76,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Consen</h1>
+      <p class="site-title">Consen</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -285,9 +286,9 @@
 <p>发送Patch:</p>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">$ git send-email --to jan.kiszka@siemens.com --to kieran@bingham.xyz --cc linux-kernel@vger.kernel.org 0001-scripts-gdb-fix-get_thread_info.patch</span><br><span class="line">0001-scripts-gdb-fix-get_thread_info.patch</span><br><span class="line">(mbox) Adding cc: Xi Kangjie &lt;imxikangjie@gmail.com&gt; from line &#x27;From: Xi Kangjie &lt;imxikangjie@gmail.com&gt;&#x27;</span><br><span class="line">(body) Adding cc: Xi Kangjie &lt;imxikangjie@gmail.com&gt; from line &#x27;Signed-off-by: Xi Kangjie &lt;imxikangjie@gmail.com&gt;&#x27;</span><br><span class="line"></span><br><span class="line">From: Xi Kangjie &lt;imxikangjie@gmail.com&gt;</span><br><span class="line">To: jan.kiszka@siemens.com,</span><br><span class="line">        kieran@bingham.xyz</span><br><span class="line">Cc: linux-kernel@vger.kernel.org,</span><br><span class="line">        Xi Kangjie &lt;imxikangjie@gmail.com&gt;</span><br><span class="line">Subject: [PATCH] scripts/gdb: fix get_thread_info</span><br><span class="line">Date: Thu, 18 Jan 2018 21:01:59 +0000</span><br><span class="line">Message-Id: &lt;20180118210159.17223-1-imxikangjie@gmail.com&gt;</span><br><span class="line">X-Mailer: git-send-email 2.13.2</span><br><span class="line"></span><br><span class="line">    The Cc list above has been expanded by additional</span><br><span class="line">    addresses found in the patch commit message. By default</span><br><span class="line">    send-email prompts before sending whenever this occurs.</span><br><span class="line">    This behavior is controlled by the sendemail.confirm</span><br><span class="line">    configuration setting.</span><br><span class="line"></span><br><span class="line">    For additional information, run &#x27;git send-email --help&#x27;.</span><br><span class="line">    To retain the current behavior, but squelch this message,</span><br><span class="line">    run &#x27;git config --global sendemail.confirm auto&#x27;.</span><br><span class="line"></span><br><span class="line">Send this email? ([y]es|[n]o|[q]uit|[a]ll): y</span><br><span class="line">Password for &#x27;smtp://imxikangjie@gmail.com@smtp.gmail.com:587&#x27;:</span><br><span class="line">OK. Log says:</span><br><span class="line">Server: smtp.gmail.com</span><br><span class="line">MAIL FROM:&lt;imxikangjie@gmail.com&gt;</span><br><span class="line">RCPT TO:&lt;jan.kiszka@siemens.com&gt;</span><br><span class="line">RCPT TO:&lt;kieran@bingham.xyz&gt;</span><br><span class="line">RCPT TO:&lt;linux-kernel@vger.kernel.org&gt;</span><br><span class="line">RCPT TO:&lt;imxikangjie@gmail.com&gt;</span><br><span class="line">From: Xi Kangjie &lt;imxikangjie@gmail.com&gt;</span><br><span class="line">To: jan.kiszka@siemens.com,</span><br><span class="line">        kieran@bingham.xyz</span><br><span class="line">Cc: linux-kernel@vger.kernel.org,</span><br><span class="line">        Xi Kangjie &lt;imxikangjie@gmail.com&gt;</span><br><span class="line">Subject: [PATCH] scripts/gdb: fix get_thread_info</span><br><span class="line">Date: Thu, 18 Jan 2018 21:01:59 +0000</span><br><span class="line">Message-Id: &lt;20180118210159.17223-1-imxikangjie@gmail.com&gt;</span><br><span class="line">X-Mailer: git-send-email 2.13.2</span><br><span class="line"></span><br><span class="line">Result: 250 2.0.0 OK 1516281059 v9sm14814354pfj.88 - gsmtp</span><br></pre></td></tr></table></figure>
 
-<p>提交成功后，就能在内核邮件列表中看到自己的邮件<a target="_blank" rel="noopener" href="https://lkml.org/lkml/2018/1/18/291">[PATCH] scripts/gdb: fix get_thread_info</a>，以及维护人员的回复<a target="_blank" rel="noopener" href="https://lkml.org/lkml/2018/1/18/516">Re: [PATCH] scripts/gdb: fix get_thread_info</a>。</p>
-<p>Linux内核被划分成不同的子系统，如网络、内存管理等，不同的子系统有相应的维护人员，一个Patch会首先提交到子系统分支，再被维护人员提交到主分支。我的Patch被提交到了mm-tree（维护人员是Andrew Morton），见mm-commits邮件列表<a target="_blank" rel="noopener" href="https://marc.info/?l=linux-mm-commits&m=151631227209235">scripts-gdb-fix-get_thread_info.patch added to -mm tree</a>，Andrew Morton确认没问题后，会将Patch发送给Linus Torvalds，见mm-commits<a target="_blank" rel="noopener" href="https://marc.info/?l=linux-mm-commits&m=151632204511765">[patch 4/6] scripts/gdb/linux/tasks.py: fix get_thread_info</a>，我的Patch还被发送给了stable分支，见stable邮件列表<a target="_blank" rel="noopener" href="https://www.spinics.net/lists/stable/msg210851.html">[patch 4/6] scripts/gdb/linux/tasks.py: fix get_thread_info</a>。</p>
-<p><strong>最终由Linus Torvalds将Patch合并到主分支，<a target="_blank" rel="noopener" href="https://github.com/torvalds/linux/commit/883d50f56d263f70fd73c0d96b09eb36c34e9305">scripts/gdb/linux/tasks.py: fix get_thread_info</a>。</strong></p>
+<p>提交成功后，就能在内核邮件列表中看到自己的邮件<a target="_blank" rel="noopener" href="https://lkml.org/lkml/2018/1/18/291">[PATCH] scripts&#x2F;gdb: fix get_thread_info</a>，以及维护人员的回复<a target="_blank" rel="noopener" href="https://lkml.org/lkml/2018/1/18/516">Re: [PATCH] scripts&#x2F;gdb: fix get_thread_info</a>。</p>
+<p>Linux内核被划分成不同的子系统，如网络、内存管理等，不同的子系统有相应的维护人员，一个Patch会首先提交到子系统分支，再被维护人员提交到主分支。我的Patch被提交到了mm-tree（维护人员是Andrew Morton），见mm-commits邮件列表<a target="_blank" rel="noopener" href="https://marc.info/?l=linux-mm-commits&m=151631227209235">scripts-gdb-fix-get_thread_info.patch added to -mm tree</a>，Andrew Morton确认没问题后，会将Patch发送给Linus Torvalds，见mm-commits<a target="_blank" rel="noopener" href="https://marc.info/?l=linux-mm-commits&m=151632204511765">[patch 4&#x2F;6] scripts&#x2F;gdb&#x2F;linux&#x2F;tasks.py: fix get_thread_info</a>，我的Patch还被发送给了stable分支，见stable邮件列表<a target="_blank" rel="noopener" href="https://www.spinics.net/lists/stable/msg210851.html">[patch 4&#x2F;6] scripts&#x2F;gdb&#x2F;linux&#x2F;tasks.py: fix get_thread_info</a>。</p>
+<p><strong>最终由Linus Torvalds将Patch合并到主分支，<a target="_blank" rel="noopener" href="https://github.com/torvalds/linux/commit/883d50f56d263f70fd73c0d96b09eb36c34e9305">scripts&#x2F;gdb&#x2F;linux&#x2F;tasks.py: fix get_thread_info</a>。</strong></p>
 <p>看到自己的代码在世界的某个角落运转，推动世界向前发展，才是真正的享受。</p>
 <p>参考：</p>
 <ul>
@@ -360,7 +361,7 @@
 
 <div class="copyright">
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

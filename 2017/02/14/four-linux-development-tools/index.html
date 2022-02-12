@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
-<meta name="generator" content="Hexo 5.4.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -20,8 +19,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta name="description" content="人与计算机交互，常见的方式有GUI（Graph User Interface，图形界面）、CLI（Command Line Interface，命令行）、TUI（Touch User Interface，触屏）等。交互方式也会影响软件开发，比如在Windows下，就可以使用强大的IDE — Visual Studio，而大多数Linux开发环境只提供了命令行界面，只能用命令行工具进行开发。 虽然命">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="人与计算机交互，常见的方式有GUI（Graph User Interface，图形界面）、CLI（Command Line Interface，命令行）、TUI（Touch User Interface，触屏）等。交互方式也会影响软件开发，比如在Windows下，就可以使用强大的IDE — Visual Studio，而大多数Linux开发环境只提供了命令行界面，只能用命令行工具进行开发。 虽然命">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux开发四件利器--Vim Tmux Git Zsh">
 <meta property="og:url" content="https://consen.github.io/2017/02/14/four-linux-development-tools/index.html">
@@ -55,6 +55,7 @@
 
 
 
+
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -78,7 +79,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Consen</h1>
+      <p class="site-title">Consen</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -251,7 +252,7 @@
 
 <h2 id="Vim"><a href="#Vim" class="headerlink" title="Vim"></a>Vim</h2><p>Linux下的编辑器，<a target="_blank" rel="noopener" href="http://www.vim.org/">Vim</a>或<a target="_blank" rel="noopener" href="https://www.gnu.org/software/emacs/">Emacs</a>二选一，我选了普及率更高的Vim。Vim的学习曲线比较陡峭，但只要稍微克服下刚开始先入为主的抵触与害怕，你慢慢会发现Vim越用越有意思，越来越离不开Vim。如果你之前一直用的是图形界面的编辑器，用完Vim会对编辑器有个全新的认识，对文本的结构也会有全新认识，从文本到段落到句子到单词到字符，Vim能做到精确掌控。</p>
 <p><img src="/images/four-linux-development-tools/vim.png" alt="vim"></p>
-<p>Vim的强大离不开灵活的配置及丰富的扩展，你可以将Vim配置成你喜欢的样子，我的Vim配置已放在GitHub，<a target="_blank" rel="noopener" href="https://github.com/consen/dotfiles/blob/master/vim/vimrc">dotfiles/vim/vimrc</a>。从配置可以看出，对于扩展插件管理我用的是<a target="_blank" rel="noopener" href="https://github.com/junegunn/vim-plug/">vim-plug</a>，几个比较有意思的扩展：</p>
+<p>Vim的强大离不开灵活的配置及丰富的扩展，你可以将Vim配置成你喜欢的样子，我的Vim配置已放在GitHub，<a target="_blank" rel="noopener" href="https://github.com/consen/dotfiles/blob/master/vim/vimrc">dotfiles&#x2F;vim&#x2F;vimrc</a>。从配置可以看出，对于扩展插件管理我用的是<a target="_blank" rel="noopener" href="https://github.com/junegunn/vim-plug/">vim-plug</a>，几个比较有意思的扩展：</p>
 <ul>
 <li><a target="_blank" rel="noopener" href="https://github.com/terryma/vim-multiple-cursors">vim-multiple-cursord</a></li>
 <li><a target="_blank" rel="noopener" href="https://github.com/itspriddle/vim-stripper">vim-stripper</a></li>
@@ -273,7 +274,7 @@
 <li>想在一个屏幕上不切换窗口，看到所有窗口的输出。</li>
 </ol>
 <p><a target="_blank" rel="noopener" href="http://tmux.github.io/">Tmux</a>（terminal multiplexer）很好地解决了上面的问题，只要建立一个远程连接，就可以开启多个终端，同时进行操作，一个查看文档，一个写代码，一个编译，一个运行程序。</p>
-<p>我的Tmux配置，<a target="_blank" rel="noopener" href="https://github.com/consen/dotfiles/blob/master/tmux/tmux.conf">dotfiles/tmux/tmux.conf</a>，Tmux命令前置操作默认为Ctrl+b，我改成了Ctrl+a。</p>
+<p>我的Tmux配置，<a target="_blank" rel="noopener" href="https://github.com/consen/dotfiles/blob/master/tmux/tmux.conf">dotfiles&#x2F;tmux&#x2F;tmux.conf</a>，Tmux命令前置操作默认为Ctrl+b，我改成了Ctrl+a。</p>
 <p><img src="/images/four-linux-development-tools/tmux.png" alt="tmux"></p>
 <p>常用的几个tmux命令：</p>
 <ul>
@@ -304,7 +305,7 @@
 </ul>
 <p>之后为了提高shell操作效率，就可以使用<a target="_blank" rel="noopener" href="http://www.zsh.org/">Zsh</a>了，当然离不开Zsh配置管理框架<a target="_blank" rel="noopener" href="http://ohmyz.sh/">Oh My Zsh</a>。</p>
 <p><img src="/images/four-linux-development-tools/zsh.png" alt="zsh"></p>
-<p>我的Zsh配置，<a target="_blank" rel="noopener" href="https://github.com/consen/dotfiles/blob/master/zsh/zshrc">dotfiles/zsh/zshrc</a>。有个扩展鼎力推荐，它使Zsh的使用效率大幅提升，<a target="_blank" rel="noopener" href="https://github.com/zsh-users/zsh-autosuggestions">zsh-autosuggestions</a>。</p>
+<p>我的Zsh配置，<a target="_blank" rel="noopener" href="https://github.com/consen/dotfiles/blob/master/zsh/zshrc">dotfiles&#x2F;zsh&#x2F;zshrc</a>。有个扩展鼎力推荐，它使Zsh的使用效率大幅提升，<a target="_blank" rel="noopener" href="https://github.com/zsh-users/zsh-autosuggestions">zsh-autosuggestions</a>。</p>
 
     </div>
 
@@ -369,7 +370,7 @@
 
 <div class="copyright">
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

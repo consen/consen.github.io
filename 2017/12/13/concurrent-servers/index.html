@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
-<meta name="generator" content="Hexo 5.4.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -20,8 +19,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta name="description" content="最近拜读了Eli Bendersky写的Concurrent Servers系列博客，作者由简单到复杂，由串行到并行，由多线程到事件驱动，再到第三方库对并发的实现，梳理了并发服务相关思想，在此对相关重点做一总结。 作者写就此文的目的是检验几种流行的并发模型，评判这些模型的伸缩性(scalability)和是否容易实现。作者自定义了一种简单的协议(protocol)，用于服务端与客户端交互，协议是有">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="最近拜读了Eli Bendersky写的Concurrent Servers系列博客，作者由简单到复杂，由串行到并行，由多线程到事件驱动，再到第三方库对并发的实现，梳理了并发服务相关思想，在此对相关重点做一总结。 作者写就此文的目的是检验几种流行的并发模型，评判这些模型的伸缩性(scalability)和是否容易实现。作者自定义了一种简单的协议(protocol)，用于服务端与客户端交互，协议是有">
 <meta property="og:type" content="article">
 <meta property="og:title" content="并发服务实现">
 <meta property="og:url" content="https://consen.github.io/2017/12/13/concurrent-servers/index.html">
@@ -54,6 +54,7 @@
 
 
 
+
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -77,7 +78,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Consen</h1>
+      <p class="site-title">Consen</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -125,7 +126,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-sequential-server"><span class="nav-text">A sequential server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Threads"><span class="nav-text">Threads</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Thread-pools"><span class="nav-text">Thread pools</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Event-driven"><span class="nav-text">Event driven</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Blocking-vs-nonblocking-I-O"><span class="nav-text">Blocking vs. nonblocking I&#x2F;O</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select"><span class="nav-text">select</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll"><span class="nav-text">epoll</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#libuv"><span class="nav-text">libuv</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis"><span class="nav-text">Redis</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-sequential-server"><span class="nav-text">A sequential server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Threads"><span class="nav-text">Threads</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Thread-pools"><span class="nav-text">Thread pools</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Event-driven"><span class="nav-text">Event driven</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Blocking-vs-nonblocking-I-x2F-O"><span class="nav-text">Blocking vs. nonblocking I&#x2F;O</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#select"><span class="nav-text">select</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#epoll"><span class="nav-text">epoll</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#libuv"><span class="nav-text">libuv</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis"><span class="nav-text">Redis</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -255,9 +256,9 @@
 <p>每一个客户端都新建一个线程，带来的问题是，客户端一多，线程会占用服务器大量内存，而且大量CPU时间用于线程上下文切换，甚至会引发安全问题，资源耗尽造成拒绝服务(DoS)攻击。所以需要对并发的客户端数量进行限制(rate-limiting)，比较流行的设计是线程池(thread pool)。</p>
 <h3 id="Thread-pools"><a href="#Thread-pools" class="headerlink" title="Thread pools"></a>Thread pools</h3><p>线程池思想简单，却功能强大。服务端创建一个有多个线程的线程池，只有线程池中有空闲线程时，才会处理新的客户端请求。在面对高负载时，线程池也是一种优雅降级(graceful degradation)，服务端仍然能以一定速率提供正常服务，而不会资源耗尽停止服务。</p>
 <h2 id="Event-driven"><a href="#Event-driven" class="headerlink" title="Event driven"></a>Event driven</h2><p>多线程并不是并发处理的唯一方式，另外一种常见的并发方法是事件驱动编程(event-driven programming)，即异步编程(asynchronous programming)。</p>
-<h3 id="Blocking-vs-nonblocking-I-O"><a href="#Blocking-vs-nonblocking-I-O" class="headerlink" title="Blocking vs. nonblocking I/O"></a>Blocking vs. nonblocking I/O</h3><p>首先对比下阻塞I/O和非阻塞I/O，阻塞I/O是我们比较熟悉的I/O API工作方式，比如从一个socket接收数据，对recv的调用会阻塞，直到接收到数据。当把socket设置为非阻塞模式，对recv的调用会立即返回，即使没有接收到数据。</p>
-<p>似乎我们可以通过非阻塞I/O来实现并发，同时处理多个客户端，只要轮询(polling)每个socket，检查是否收到了数据。但是在实际应用中，这种解决方案伸缩性较差，比如现在有1000个客户端需要并发处理，单单是遍历所有sockets就要花费很多时间，相当低效。其实操作系统内部是知道哪个socket收到了数据，我们不必扫描所有sockets，直接使用提供的API即可。</p>
-<h3 id="select"><a href="#select" class="headerlink" title="select"></a>select</h3><p>select允许在单线程中监控多个文件描述符，无需不必要的轮询。通过select，实现了I/O复用(I/O multiplexing)，在同一个线程中并发处理多个客户端，一个客户端处理完一些工作后，就切换到另一个客户端接着处理。</p>
+<h3 id="Blocking-vs-nonblocking-I-x2F-O"><a href="#Blocking-vs-nonblocking-I-x2F-O" class="headerlink" title="Blocking vs. nonblocking I&#x2F;O"></a>Blocking vs. nonblocking I&#x2F;O</h3><p>首先对比下阻塞I&#x2F;O和非阻塞I&#x2F;O，阻塞I&#x2F;O是我们比较熟悉的I&#x2F;O API工作方式，比如从一个socket接收数据，对recv的调用会阻塞，直到接收到数据。当把socket设置为非阻塞模式，对recv的调用会立即返回，即使没有接收到数据。</p>
+<p>似乎我们可以通过非阻塞I&#x2F;O来实现并发，同时处理多个客户端，只要轮询(polling)每个socket，检查是否收到了数据。但是在实际应用中，这种解决方案伸缩性较差，比如现在有1000个客户端需要并发处理，单单是遍历所有sockets就要花费很多时间，相当低效。其实操作系统内部是知道哪个socket收到了数据，我们不必扫描所有sockets，直接使用提供的API即可。</p>
+<h3 id="select"><a href="#select" class="headerlink" title="select"></a>select</h3><p>select允许在单线程中监控多个文件描述符，无需不必要的轮询。通过select，实现了I&#x2F;O复用(I&#x2F;O multiplexing)，在同一个线程中并发处理多个客户端，一个客户端处理完一些工作后，就切换到另一个客户端接着处理。</p>
 <p><img src="/images/concurrent-servers/multiplexed-flow.png"></p>
 <p>然而select有一定的限制，一是可监控的文件描述符数量受限，一般最多为1024，二是性能较差，当select返回时，提供的信息只有可用文件描述的数量，具体是哪些文件描述符可用，还是需要遍历所有监控的文件描述符。因此现代并发服务实现已经很少用select了，转而使用更高效的其他API，如epoll。</p>
 <h3 id="epoll"><a href="#epoll" class="headerlink" title="epoll"></a>epoll</h3><p>epoll的高效之处在于直接返回所有可用的文件描述符，不必再去遍历所有文件描述符，这样就将找到可用文件描述符的时间复杂度从O(N)降到了O(1)。</p>
@@ -329,7 +330,7 @@
 
 <div class="copyright">
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

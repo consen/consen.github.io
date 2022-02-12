@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)">
-<meta name="generator" content="Hexo 5.4.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -20,8 +19,9 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.8.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
-<meta name="description" content="相对于传统的静态分析检测，动态分析技术可以获得恶意样本的详细行为信息。恶意样本作者为了规避动态检测，采取了各种手段，如Anti-VM, Anti-Sandbox, Anti-Debugging。 Anti-VM是为了检测当前运行环境是否是虚拟环境，如果是，恶意样本会停止恶意行为，让安全研究员误认为此样本是良性的。比如恶意样本如果在物理环境下运行，会去连接C&amp;C服务器，当检测到是在虚拟环境下">
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+
+  <meta name="description" content="相对于传统的静态分析检测，动态分析技术可以获得恶意样本的详细行为信息。恶意样本作者为了规避动态检测，采取了各种手段，如Anti-VM, Anti-Sandbox, Anti-Debugging。 Anti-VM是为了检测当前运行环境是否是虚拟环境，如果是，恶意样本会停止恶意行为，让安全研究员误认为此样本是良性的。比如恶意样本如果在物理环境下运行，会去连接C&amp;C服务器，当检测到是在虚拟环境下">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Anti-VM之CPUID指令">
 <meta property="og:url" content="https://consen.github.io/2016/09/11/Anti-VM-via-CPUID/index.html">
@@ -51,6 +51,7 @@
 
 
 
+
   <noscript>
     <link rel="stylesheet" href="/css/noscript.css">
   </noscript>
@@ -74,7 +75,7 @@
 
     <a href="/" class="brand" rel="start">
       <i class="logo-line"></i>
-      <h1 class="site-title">Consen</h1>
+      <p class="site-title">Consen</p>
       <i class="logo-line"></i>
     </a>
   </div>
@@ -249,8 +250,8 @@
 <p>接下来就借助<code>CPUID</code>指令，检测当前环境是否是虚拟的。</p>
 <p><code>CPUID</code>指令用来获取CPU信息，将功能号作为参数传入<code>EAX</code>寄存器，CPUID将信息返回到<code>EAX、EBX、ECX、EDX</code>寄存器。下面是两个检测虚拟环境的功能号：</p>
 <ul>
-<li>EAX = 1，获取CPU功能信息，如果ECX第31位为1， 则表明有hypervisor存在，即环境是虚拟的。</li>
-<li>EAX = 0x40000000, 获取hypervisor信息，返回12字节长度字符串：</li>
+<li>EAX &#x3D; 1，获取CPU功能信息，如果ECX第31位为1， 则表明有hypervisor存在，即环境是虚拟的。</li>
+<li>EAX &#x3D; 0x40000000, 获取hypervisor信息，返回12字节长度字符串：</li>
 </ul>
 <figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&quot;KVMKVMKVM\0\0\0&quot;    KVM</span><br><span class="line">&quot;Microsoft Hv&quot;       Microsoft Hyper-V or Windows Virtual PC</span><br><span class="line">&quot;VMwareVMware&quot;       VMware</span><br><span class="line">&quot;XenVMMXenVMM&quot;       Xen</span><br><span class="line">&quot;prl hyperv  &quot;       Parallels</span><br><span class="line">&quot;VBoxVBoxVBox&quot;       VirtualBox</span><br></pre></td></tr></table></figure>
 
@@ -333,7 +334,7 @@
 
 <div class="copyright">
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
