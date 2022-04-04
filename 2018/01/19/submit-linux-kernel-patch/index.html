@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width">
 <meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.0.0">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.1.0">
 
 
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
@@ -16,12 +16,12 @@
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css" integrity="sha256-mUZM63G8m73Mcidfrv5E+Y61y7a12O5mW4ezU3bxqW4=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.1.1/css/all.min.css" integrity="sha256-DfWjNxDkM94fVBWx1H5BMMp0Zq7luBlV8QRcSES7s+0=" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
 
-<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.10.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
+<script class="next-config" data-name="main" type="application/json">{"hostname":"consen.github.io","root":"/","images":"/images","scheme":"Mist","darkmode":true,"version":"8.11.0","exturl":false,"sidebar":{"position":"right","display":"hide","padding":18,"offset":12},"copycode":true,"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js"></script>
 
-  <meta name="description" content="上一篇博客使用QEMU和GDB调试Linux内核，最后使用内核提供的GDB扩展功能获取当前运行进程，发现内核已经不再使用thread_info获取当前进程，而是使用Per-CPU变量。而且从内核4.9版本开始，thread_info也不再位于内核栈底部，然而内核提供的辅助调试函数lx_thread_info()仍然通过内核栈底地址获取thread_info，很明显这是个Bug，于是决定将其修复并提">
+    <meta name="description" content="上一篇博客使用QEMU和GDB调试Linux内核，最后使用内核提供的GDB扩展功能获取当前运行进程，发现内核已经不再使用thread_info获取当前进程，而是使用Per-CPU变量。而且从内核4.9版本开始，thread_info也不再位于内核栈底部，然而内核提供的辅助调试函数lx_thread_info()仍然通过内核栈底地址获取thread_info，很明显这是个Bug，于是决定将其修复并提">
 <meta property="og:type" content="article">
 <meta property="og:title" content="提交Linux内核Patch">
 <meta property="og:url" content="https://consen.github.io/2018/01/19/submit-linux-kernel-patch/index.html">
@@ -90,10 +90,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu">
-        <li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li>
-        <li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
-        <li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li>
   </ul>
 </nav>
 
@@ -202,11 +199,16 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.png">
       <meta itemprop="name" content="Consen">
-      <meta itemprop="description" content="">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
       <meta itemprop="name" content="Consen">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="提交Linux内核Patch | Consen">
+      <meta itemprop="description" content="">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -248,14 +250,14 @@
 <span id="more"></span>
 
 <h2 id="Bug修复"><a href="#Bug修复" class="headerlink" title="Bug修复"></a>Bug修复</h2><p>Bug的原因已经很明确了，先看下问题代码<code>scripts/gdb/linux/tasks.py</code>：</p>
-<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_thread_info</span>(<span class="params">task</span>):</span></span><br><span class="line">    thread_info_ptr_type = thread_info_type.get_type().pointer()</span><br><span class="line">    <span class="keyword">if</span> utils.is_target_arch(<span class="string">&quot;ia64&quot;</span>):</span><br><span class="line">        ...</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        thread_info = task[<span class="string">&#x27;stack&#x27;</span>].cast(thread_info_ptr_type)</span><br><span class="line">    <span class="keyword">return</span> thread_info.dereference()</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">get_thread_info</span>(<span class="params">task</span>):</span><br><span class="line">    thread_info_ptr_type = thread_info_type.get_type().pointer()</span><br><span class="line">    <span class="keyword">if</span> utils.is_target_arch(<span class="string">&quot;ia64&quot;</span>):</span><br><span class="line">        ...</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        thread_info = task[<span class="string">&#x27;stack&#x27;</span>].cast(thread_info_ptr_type)</span><br><span class="line">    <span class="keyword">return</span> thread_info.dereference()</span><br></pre></td></tr></table></figure>
 
 <p>还是使用的老的流程，通过栈底地址获取<code>thread_info</code>。</p>
 <p>从内核4.9版本开始，已将<code>thread_info</code>移到了<code>task_struct</code>(<code>include\linux\sched.h</code>)，而且一定是第一个字段：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> &#123;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> CONFIG_THREAD_INFO_IN_TASK</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * For reasons of header soup (see current_thread_info()), this</span></span><br><span class="line"><span class="comment">     * must be the first element of task_struct.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">thread_info</span>      <span class="title">thread_info</span>;</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> &#123;</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_THREAD_INFO_IN_TASK</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * For reasons of header soup (see current_thread_info()), this</span></span><br><span class="line"><span class="comment">     * must be the first element of task_struct.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">thread_info</span>      <span class="title">thread_info</span>;</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>所以修复很简单，只需要判断task的第一个字段是否为<code>thread_info</code>，如果是，则直接将其返回；如果不是，还是走原先的流程：</p>
-<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">$ git diff ./</span><br><span class="line">diff --git a/scripts/gdb/linux/tasks.py b/scripts/gdb/linux/tasks.py</span><br><span class="line">index <span class="number">1b</span>f949c43b76..f6ab3ccf698f <span class="number">100644</span></span><br><span class="line">--- a/scripts/gdb/linux/tasks.py</span><br><span class="line">+++ b/scripts/gdb/linux/tasks.py</span><br><span class="line">@@ <span class="number">-96</span>,<span class="number">6</span> +<span class="number">96</span>,<span class="number">8</span> @@ <span class="function">def <span class="title">get_thread_info</span><span class="params">(task)</span>:</span></span><br><span class="line"><span class="function">         thread_info_addr </span>= task.address + ia64_task_size</span><br><span class="line">         thread_info = thread_info_addr.cast(thread_info_ptr_type)</span><br><span class="line">     <span class="keyword">else</span>:</span><br><span class="line">+        <span class="keyword">if</span> task.type.fields()[<span class="number">0</span>].type == thread_info_type.get_type():</span><br><span class="line">+            <span class="keyword">return</span> task[<span class="string">&#x27;thread_info&#x27;</span>]</span><br><span class="line">         thread_info = task[<span class="string">&#x27;stack&#x27;</span>].cast(thread_info_ptr_type)</span><br><span class="line">     <span class="keyword">return</span> thread_info.dereference()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">$ git diff ./</span><br><span class="line">diff --git a/scripts/gdb/linux/tasks.py b/scripts/gdb/linux/tasks.py</span><br><span class="line">index <span class="number">1b</span>f949c43b76..f6ab3ccf698f <span class="number">100644</span></span><br><span class="line">--- a/scripts/gdb/linux/tasks.py</span><br><span class="line">+++ b/scripts/gdb/linux/tasks.py</span><br><span class="line">@@ <span class="number">-96</span>,<span class="number">6</span> +<span class="number">96</span>,<span class="number">8</span> @@ def <span class="title function_">get_thread_info</span><span class="params">(task)</span>:</span><br><span class="line">         thread_info_addr = task.address + ia64_task_size</span><br><span class="line">         thread_info = thread_info_addr.cast(thread_info_ptr_type)</span><br><span class="line">     <span class="keyword">else</span>:</span><br><span class="line">+        <span class="keyword">if</span> task.type.fields()[<span class="number">0</span>].type == thread_info_type.get_type():</span><br><span class="line">+            <span class="keyword">return</span> task[<span class="string">&#x27;thread_info&#x27;</span>]</span><br><span class="line">         thread_info = task[<span class="string">&#x27;stack&#x27;</span>].cast(thread_info_ptr_type)</span><br><span class="line">     <span class="keyword">return</span> thread_info.dereference()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
 <h2 id="Git配置"><a href="#Git配置" class="headerlink" title="Git配置"></a>Git配置</h2><p>添加用户和Email配置，用于<code>git send-email</code>发送Patch。</p>
 <p>这里使用Gmail邮箱服务，在Linux项目<code>.git/config</code>配置中添加如下内容：</p>
